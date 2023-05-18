@@ -179,7 +179,7 @@ class ColorLightDisplay:
 
             if self.frame_queue:
                 frame = self.frame_queue.popleft()
-                self.display_frame(frame, self.brightness_level)
+                self.display_frame(frame)
 
             # Sleep for a small amount of time
             time.sleep(1 / self.fps)
