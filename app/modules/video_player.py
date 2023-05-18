@@ -7,7 +7,6 @@ import threading
 from enum import Enum
 from collections import deque
 from typing import Callable
-from modules.colorlight import ColorLightDisplay
 
 class VideoPlayerState(Enum):
     PLAYING = 1
@@ -32,13 +31,8 @@ class VideoPlayer:
         self.lock = threading.Lock()
         self.current_video_index = 0
 
-        self.display = ColorLightDisplay(
-            frame_queue=deque(maxlen=10),
-            interface="en7",
-            brightness_level=50,
-        )
 
-        self.display_callback = display_callback if display_callback is not None else self.display.display_frame
+        self.display_callback = display_callback if display_callback is not None else None
         self.populate_video_queue()
 
     def play(self):
@@ -141,4 +135,4 @@ class VideoPlayer:
                         elif self.mode == VideoPlayerMode.STOP:
                             self.stop()
 
-            time.sleep(1 / self.display.fps)
+            time.sleep(1 / self.fps)
