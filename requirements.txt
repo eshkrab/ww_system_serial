@@ -1,4 +1,7 @@
-quart
-quart-cors
+# requirements.txt
+numpy
+opencv-python-headless
+zmq
+aiohttp
 asyncio
-aiofiles
+
