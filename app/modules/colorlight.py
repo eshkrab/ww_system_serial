@@ -3,8 +3,10 @@ import numpy as np
 from collections import deque
 import threading
 import time
+import platform  
 
-from scapy.all import *
+if platform.system() == "Darwin":
+    from scapy.all import *
 
 # Colorlight protocol constants
 #  SRC_MAC = b'\x22\x22\x33\x44\x55\x66'
@@ -14,7 +16,6 @@ from scapy.all import *
 #  ETHERTYPE_DISPLAY_FRAME = 0x0107
 #  ETHERTYPE_PIXEL_DATA_FRAME_BASE = 0x5500
 #  INTERFACE = "eth0"  # Replace with your network interface name
-
 
 class ColorLightDisplay:
     def __init__(
@@ -41,16 +42,20 @@ class ColorLightDisplay:
         self.px_width = 64
         self.px_height = 64
 
-        #  #  self.raw_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-        #  self.raw_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW)
-        #  self.raw_socket.bind((self.interface, 0))
+         if platform.system() == "Darwin":
+            # macOS
+            self.raw_socket = None
+        else:
+            # Linux
+            self.raw_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+            self.raw_socket.bind((self.interface, 0))
 
         self.display_thread = None
-        #  self.display_thread = threading.Thread(target=self.display_loop)
         #  self.display_thread.start()
 
-    #  def __del__(self):
-    #      self.raw_socket.close()
+    def __del__(self):
+        if self.raw_socket:
+            self.raw_socket.close()
 
     def __enter__(self):
         return self
@@ -114,8 +119,13 @@ class ColorLightDisplay:
 
     def send_raw_socket_package(self, package: bytes) -> None:
         eth_frame = self.dst_mac + self.src_mac + package
-        #  self.raw_socket.send(eth_frame)
-        sendp(eth_frame, self.interface)
+
+        if platform.system() == "Darwin":
+            # macOS
+            sendp(eth_frame, self.interface)
+        else:
+            # Linux
+            self.raw_socket.send(eth_frame)
 
     def process_frame(self, frame: np.ndarray) -> list:
         height, width, _ = frame.shape
