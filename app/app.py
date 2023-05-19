@@ -100,8 +100,8 @@ class PlayerApp:
             await self.sock.send_string(str(fps))
 
         elif command == 'set_playlist':
-            #  self.video_player.stop()
-            #  self.video_player.load_playlist()
+            self.video_player.stop()
+            self.video_player.load_playlist()
             await self.sock.send_string("OK")
 
         else:
