@@ -17,6 +17,7 @@ def load_config(config_file):
     return config
 
 config = load_config('config/config.json')
+video_dir = config['video_dir']
 
 class PlayerApp:
     def __init__(self):
@@ -27,12 +28,13 @@ class PlayerApp:
         self.display = ColorLightDisplay(
             interface=config['interface'],
             brightness_level=config['brightness_level'],
+            dummy = True,
         )
 
-        self.video_player = VideoPlayer(self.ws_queue, "content", display_callback=self.display.display_frame)
+        self.video_player = VideoPlayer(self.ws_queue, "video_dir", display_callback=self.display.display_frame)
 
     async def run(self):
-        self.sock.bind(f"tcp://{config['zmq']['ip']}:{config['zmq']['port']}")
+        self.sock.bind(f"tcp://{config['zmq']['ip_player']}:{config['zmq']['port']}")
 
         while True:
             try:
@@ -59,17 +61,27 @@ class PlayerApp:
                     self.video_player.play()
                     await self.sock.send_string("OK")
 
+                elif command == 'prev':
+                    self.video_player.prev_video()
+                    await self.sock.send_string("OK")
+
+                elif command == 'next':
+                    self.video_player.next_video()
+                    await self.sock.send_string("OK")
+
                 elif command == 'set_brightness':
                     brightness = float(message.split(' ', 1)[1])
-                    self.display.brightness_level = brightness
+                    logging.info(f"Received set_brightness: {brightness}")
+                    self.display.brightness_level = int(brightness)  # make sure brightness is an integer value
                     await self.sock.send_string("OK")
 
                 elif command == 'get_brightness':
-                    brightness = self.display.brightness_level
+                    brightness = float(self.display.brightness_level)
                     await self.sock.send_string(str(brightness))
+                    logging.debug(f"Received get_brightness:, responded {brightness}")
 
                 elif command == 'set_fps':
-                    fps = float(message.split(' ', 1)[1])
+                    fps = int(message.split(' ', 1)[1])
                     self.video_player.fps = fps
                     await self.sock.send_string("OK")
 

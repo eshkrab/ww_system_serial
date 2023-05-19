@@ -20,8 +20,9 @@ if platform.system() == "Darwin":
 class ColorLightDisplay:
     def __init__(
         self,
-        frame_queue,
         interface: str,
+        frame_queue = None,
+        dummy: bool = False,
         src_mac: bytes = b"\x22\x22\x33\x44\x55\x66",
         dst_mac: bytes = b"\x11\x22\x33\x44\x55\x66",
         fps: int = 60,
@@ -39,22 +40,24 @@ class ColorLightDisplay:
         self.ether_type_display_frame = ether_type_display_frame
         self.ether_type_pixel_data_frame_base = ether_type_pixel_data_frame_base
 
+        self.dummy = dummy
         self.px_width = 64
         self.px_height = 64
-
-         if platform.system() == "Darwin":
-            # macOS
-            self.raw_socket = None
-        else:
-            # Linux
-            self.raw_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-            self.raw_socket.bind((self.interface, 0))
-
         self.display_thread = None
+
+        if not self.dummy:
+            if platform.system() == "Darwin":
+               # macOS
+               self.raw_socket = None
+            else:
+               # Linux
+               self.raw_socket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+               self.raw_socket.bind((self.interface, 0))
+
         #  self.display_thread.start()
 
     def __del__(self):
-        if self.raw_socket:
+        if not self.dummy and self.raw_socket:
             self.raw_socket.close()
 
     def __enter__(self):
@@ -78,7 +81,7 @@ class ColorLightDisplay:
     def build_set_brightness_frame_package(self, brightness: int) -> bytes:
         #  ethertype_set_brightness_frame = 0x0A00 | brightness
         ethertype_set_brightness_frame = (0x0A << 8) | brightness
-        print(hex( ethertype_set_brightness_frame))
+        #  print(hex( ethertype_set_brightness_frame))
         ethertype = ethertype_set_brightness_frame + brightness
 
         length = 63
@@ -120,12 +123,13 @@ class ColorLightDisplay:
     def send_raw_socket_package(self, package: bytes) -> None:
         eth_frame = self.dst_mac + self.src_mac + package
 
-        if platform.system() == "Darwin":
-            # macOS
-            sendp(eth_frame, self.interface)
-        else:
-            # Linux
-            self.raw_socket.send(eth_frame)
+        if not self.dummy:
+            if platform.system() == "Darwin":
+                # macOS
+                sendp(eth_frame, self.interface)
+            else:
+                # Linux
+                self.raw_socket.send(eth_frame)
 
     def process_frame(self, frame: np.ndarray) -> list:
         height, width, _ = frame.shape
