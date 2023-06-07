@@ -28,10 +28,10 @@ class PlayerApp:
             "repeat": self.repeat,
             "repeat_one": self.repeat_one,
             "repeat_none": self.repeat_none,
-            "get_mode": self.get_mode,
+            #  "get_mode": self.get_mode,
             "set_fps": self.set_fps,
             "get_fps": self.get_fps,
-            "set_playlist": self.set_playlist
+            #  "set_playlist": self.set_playlist
         }
 
 
@@ -50,32 +50,32 @@ class PlayerApp:
         self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
 
-    async def play(self):
+    async def play(self, params):
         logging.debug("Received play")
         self.video_player.play()
         await self.sock.send_string("OK")
 
-    async def pause(self):
+    async def pause(self. params):
         logging.debug("Received pause")
         self.video_player.pause()
         await self.sock.send_string("OK")
 
-    async def stop(self):
+    async def stop(self, params):
         logging.debug("Received stop")
         self.video_player.stop()
         await self.sock.send_string("OK")
 
-    async def restart(self):
+    async def restart(self, params):
         logging.debug("Received restart")
         self.video_player.restart_video()
         await self.sock.send_string("OK")
 
-    async def prev(self):
+    async def prev(self, params):
         logging.debug("Received prev")
         self.video_player.prev_video()
         await self.sock.send_string("OK")
 
-    async def next(self):
+    async def next(self, params):
         logging.debug("Received next")
         self.video_player.next_video()
         await self.sock.send_string("OK")
@@ -95,7 +95,7 @@ class PlayerApp:
             self.display.brightness_level = int(brightness)
             await self.sock.send_string("OK")
 
-    async def get_brightness(self):
+    async def get_brightness(self, params):
         logging.debug("Received get_brightness")
         await self.sock.send_string(str(self.display.brightness_level))
 
@@ -106,21 +106,21 @@ class PlayerApp:
             self.video_player.fps = fps
             await self.sock.send_string("OK")
     
-    async def get_fps(self):
+    async def get_fps(self, params):
         logging.debug("Received get_fps")
         await self.sock.send_string(str(self.video_player.fps))
 
-    async def repeat(self):
+    async def repeat(self, params):
         logging.debug("Received repeat")
         self.video_player.mode = VideoPlayerMode.REPEAT
         await self.sock.send_string("OK")
 
-    async def repeat_one(self):
+    async def repeat_one(self, params):
         logging.debug("Received repeat_one")
         self.video_player.mode = VideoPlayerMode.REPEAT_ONE
         await self.sock.send_string("OK")
 
-    async def repeat_none(self):
+    async def repeat_none(self, params):
         logging.debug("Received repeat_none")
         self.video_player.mode = VideoPlayerMode.REPEAT_NONE
         await self.sock.send_string("OK")
@@ -170,6 +170,8 @@ class PlayerApp:
     async def process_message(self, message):
         try:
             command = message.split(' ', 1)[0]
+            logging.debug(f"Received command: {command}")
+
             if command in self.command_dict:  # check if command exists in command_dict
                 await self.command_dict[command](message)
             else:
@@ -179,115 +181,6 @@ class PlayerApp:
             logging.error(f"Error processing message: {str(e)}")
             await self.sock.send_string(f"Error processing message: {str(e)}")
 
-    #  async def process_message(self, message):
-    #      command = message.split(' ', 1)[0]
-    #      logging.info(f"Received command: {command}")
-    #
-    #      if command == 'play':
-    #          #  video_index_or_name = message.split(' ', 1)[1] if len(message.split(' ', 1)) > 1 else None
-    #          #  self.video_player.play(video_index_or_name)
-    #          self.video_player.play()
-    #          logging.debug(f"Received play")
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'pause':
-    #          logging.debug("Received pause")
-    #          self.video_player.pause()
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'stop':
-    #          logging.debug("Received stop")
-    #          self.video_player.stop()
-    #          await self.sock.send_string("OK")
-    #
-    #      #  elif command == 'resume':
-    #      #      logging.debug("Received resume")
-    #      #      self.video_player.resume()
-    #      #      await self.sock.send_string("OK")
-    #
-    #      elif command == 'restart':
-    #          logging.debug("Received restart")
-    #          self.video_player.prev_video()
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'prev':
-    #          logging.debug("Received prev")
-    #          self.video_player.prev_video()
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'next':
-    #          logging.debug("Received next")
-    #          self.video_player.next_video()
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'get_state':
-    #          logging.debug("Received get_state")
-    #          logging.debug(f"Received get_state: responded {self.video_player.state}")
-    #          state = "playing" if self.video_player.state == VideoPlayerState.PLAYING else "paused"
-    #          if self.video_player.state == VideoPlayerState.STOPPED:
-    #              state = "stopped"
-    #
-    #          logging.debug(f"Received get_state: responded {state}")
-    #          await self.sock.send_string(str(state))
-    #          #  await self.sock.send_string("OK")
-    #
-    #      elif command == 'set_brightness':
-    #          logging.debug("Received set_brightness")
-    #          brightness = float(message.split(' ', 1)[1])
-    #          self.display.brightness_level = int(brightness)
-    #          await self.sock.send_string("OK")
-    #          logging.info(f"Received set_brightness: {brightness}")
-    #
-    #      elif command == 'get_brightness':
-    #          logging.debug("Received get_brightness")
-    #          brightness = float(self.display.brightness_level)
-    #          await self.sock.send_string(str(brightness))
-    #          logging.debug(f"Received get_brightness: responded {brightness}")
-    #
-    #      elif command == 'repeat':
-    #          logging.debug("Received REPEAT")
-    #          self.video_player.mode = VideoPlayerMode.REPEAT
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'repeat_one':
-    #          logging.debug("Received REPEAT_ONE")
-    #          self.video_player.mode = VideoPlayerMode.REPEAT_ONE
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'repeat_none':
-    #          logging.debug("Received REPEAT_NONE")
-    #          self.video_player.mode = VideoPlayerMode.REPEAT_NONE
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'get_mode':
-    #          logging.debug("Received get_mode")
-    #          mode = "repeat" if self.video_player.mode == VideoPlayerMode.REPEAT else "repeat_one"
-    #          if self.video_player.mode == VideoPlayerMode.REPEAT_NONE:
-    #              mode = "repeat_none"
-    #
-    #          logging.debug(f"Received get_mode: responded {mode}")
-    #          await self.sock.send_string(str(mode))
-    #
-    #      elif command == 'set_fps':
-    #          logging.debug("Received set_fps")
-    #          fps = int(message.split(' ', 1)[1])
-    #          self.video_player.fps = fps
-    #          await self.sock.send_string("OK")
-    #
-    #      elif command == 'get_fps':
-    #          logging.debug("Received get_fps")
-    #          fps = self.video_player.fps
-    #          await self.sock.send_string(str(fps))
-    #
-    #      elif command == 'set_playlist':
-    #          logging.debug("Received set_playlist")
-    #          #  self.video_player.stop()
-    #          #  self.video_player.load_playlist()
-    #          await self.sock.send_string("OK")
-    #
-    #      else:
-    #          await self.sock.send_string("Unknown command")
-    #          logging.warning("Unknown command received {command}")
 
 
 def load_config(config_file):
