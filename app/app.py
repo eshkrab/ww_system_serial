@@ -55,7 +55,7 @@ class PlayerApp:
         self.video_player.play()
         await self.sock.send_string("OK")
 
-    async def pause(self. params):
+    async def pause(self, params):
         logging.debug("Received pause")
         self.video_player.pause()
         await self.sock.send_string("OK")
