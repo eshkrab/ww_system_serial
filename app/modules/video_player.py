@@ -55,6 +55,7 @@ class VideoPlayer:
         logging.debug("Stopping before lock")
         with self.lock:
             if self.state != VideoPlayerState.STOPPED:
+                logging.debug("STOPPING")
                 self.state = VideoPlayerState.STOPPED
                 self.playlist.clear()
                 self.current_video = None
@@ -64,6 +65,7 @@ class VideoPlayer:
                 if self.playback_thread and self.playback_thread.is_alive():
                     logging.debug("Stopping playback thread")
                     self.playback_thread.join()
+            #  self.state = VideoPlayerState.STOPPED
         logging.debug("Stopped after lock")
 
     def pause(self):
@@ -95,7 +97,7 @@ class VideoPlayer:
     def load_video(self, index: int):
         with self.lock:
             self.current_video_index = index
-            self.current_video = cv2.VideoCapture(self.playlist[self.current_video_index]['video_path'])
+            self.current_video = cv2.VideoCapture(self.playlist[self.current_video_index]['filepath'])
 
     def load_playlist(self):
         if not os.path.exists(self.playlist_path):
@@ -107,8 +109,9 @@ class VideoPlayer:
         self.mode = VideoPlayerMode[playlist["mode"].upper()]
         self.playlist = [
             {
-                "video_path": os.path.join(self.video_dir, video_info['filepath']), 
-                "playback_mode": self.mode,
+                #  "video_path": os.path.join(self.video_dir, video_info['filepath']),
+                #  "playback_mode": self.mode,
+                "filepath": video_info['filepath'],
                 "name": video_info['name'],
                 "thumbnail": video_info['thumbnail']
             } 
