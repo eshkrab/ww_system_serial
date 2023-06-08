@@ -2,9 +2,11 @@ import os
 import cv2
 import glob
 import time
+import array
 import json
 import threading
 import logging
+import socket
 import numpy as np
 from enum import Enum
 from collections import deque
@@ -15,7 +17,7 @@ from queue import Queue
 from ola.ClientWrapper import ClientWrapper
 from ola.OlaClient import OlaClient
 
-from ww_utils import WWFile
+from modules.ww_utils import WWFile
 
 class VideoPlayerState(Enum):
     PLAYING = 1
@@ -43,6 +45,9 @@ class WWVideoPlayer:
         self.display_callback = display_callback
         self.ola_thread = None
         self.wrapper = None
+        self.client = None
+        # Create a TCP socket
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.load_playlist()
 
@@ -146,8 +151,19 @@ class WWVideoPlayer:
             json.dump(playlist, f, indent=4)
 
     def ola_integration_loop(self):
+        # Bind the socket to a specific address and port
+        host = '192.168.86.147'  # Example IP address
+        port = 9010  # Example port number
+        self.socket.connect((host, port))
         self.wrapper = ClientWrapper()
-        self.wrapper.Client().PatchPort(2, 1, True, OlaClient.PATCH, 1, self.ola_patch_port_callback)
+
+
+        self.client = self.wrapper.Client()
+        #  self.client._socket = self.socket
+# create a tcp socket with 'ola' and '9010'
+
+
+        self.client.PatchPort(2, 1, True, OlaClient.PATCH, 1, self.ola_patch_port_callback)
         #  self.wrapper.Run()
 
     def ola_patch_port_callback(self, status):
@@ -177,10 +193,21 @@ class WWVideoPlayer:
     def convert_frame_to_ola_data(self, frame):
         # Convert WW animation frame to OLA data format
         # Implement your conversion logic here
-        pass
+        dmx_data = array.array('B')
+        for i in range(0, len(frame), 3):
+            dmx_data.append(frame[i])
+        return dmx_data
+        #  pass
 
     def send_ola_data(self, data):
         # Send OLA data to the appropriate channel/universe
         # Implement your OLA sending logic here
+        if self.wrapper:
+            self.client.SendDmx(1, data, self.DmxSent)
         pass
+
+    def DmxSent(state):
+      if not state.Succeeded():
+        logger.debug("OLA fail to send DMX")
+        self.wrapper.Stop()
 
