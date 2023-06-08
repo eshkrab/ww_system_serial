@@ -1,3 +1,4 @@
+from os import name
 import zmq
 import zmq.asyncio
 import asyncio
@@ -31,6 +32,7 @@ class PlayerApp:
             #  "get_mode": self.get_mode,
             "set_fps": self.set_fps,
             "get_fps": self.get_fps,
+            "get_current_media": self.get_current_video,
             #  "set_playlist": self.set_playlist
         }
 
@@ -117,6 +119,11 @@ class PlayerApp:
         logging.debug("Received repeat_none")
         self.video_player.mode = VideoPlayerMode.REPEAT_NONE
         await self.sock.send_string("OK")
+
+    async def get_current_video(self, params):
+        #return current video name
+        await self.sock.send_string(self.video_player.get_current_video_name())
+        #  await self.sock.send_string(self.video_player.current_video)
 
 
     def get_log_level(self, level):
