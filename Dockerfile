@@ -16,8 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PYTHONUNBUFFERED=1
 
 # Make port 5000 available to the world outside this container
-EXPOSE 5555
-EXPOSE 9090
+EXPOSE 5555 5568
 
 # Run the command to start the player app
 CMD [ "python", "app/app.py" ]

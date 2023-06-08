@@ -11,7 +11,7 @@ header_size = 13
 chunk_size = 512
 
 class WWFile:
-    def __init__(self, filename, _play_mode=PlayMode.HOLD):
+    def __init__(self, filename, _play_mode=PlayMode.LOOP):
         self.filename = filename
         self.header = None
         self.framerate = None

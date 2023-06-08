@@ -4,8 +4,8 @@ import zmq.asyncio
 import asyncio
 import logging
 import json
-from modules.video_player import VideoPlayer, VideoPlayerState, VideoPlayerMode
-from modules.ww_player import WWVideoPlayer
+#  from modules.video_player import VideoPlayer, VideoPlayerState, VideoPlayerMode
+from modules.ww_player import WWVideoPlayer, VideoPlayerState, VideoPlayerMode
 from modules.colorlight import ColorLightDisplay
 
 class PlayerApp:
@@ -88,6 +88,7 @@ class PlayerApp:
         state = "playing" if self.video_player.state == VideoPlayerState.PLAYING else "paused"
         if self.video_player.state == VideoPlayerState.STOPPED:
             state = "stopped"
+            logging.debug("Received get_state: " + state)
         await self.sock.send_string(str(state))
 
     async def set_brightness(self, params):
