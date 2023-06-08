@@ -5,6 +5,7 @@ import asyncio
 import logging
 import json
 from modules.video_player import VideoPlayer, VideoPlayerState, VideoPlayerMode
+from modules.ww_player import WWVideoPlayer
 from modules.colorlight import ColorLightDisplay
 
 class PlayerApp:
@@ -43,13 +44,16 @@ class PlayerApp:
         if dummy_key_s == "True":
             dummy_key = True
 
-        self.display = ColorLightDisplay(
-            interface=config['interface'],
-            brightness_level=config['brightness_level'],
-            dummy= dummy_key
-        )
+        #  self.display = ColorLightDisplay(
+        #      interface=config['interface'],
+        #      brightness_level=config['brightness_level'],
+        #      dummy= dummy_key
+        #  )
 
-        self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
+        #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
+
+        self.video_player = WWVideoPlayer(self.ws_queue, config['video_dir'], )
+
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
 
     async def play(self, params):
@@ -90,11 +94,11 @@ class PlayerApp:
         logging.debug("Received set_brightness")
         brightness = float(params[0]) if params else None
         if brightness is not None:
-            self.display.brightness_level = int(brightness)
+            #  self.display.brightness_level = int(brightness)
             await self.sock.send_string("OK")
 
     async def get_brightness(self, params):
-        await self.sock.send_string(str(self.display.brightness_level))
+        await self.sock.send_string(str(50))
 
     async def set_fps(self, params):
         fps = int(float(params[0])) if params else None

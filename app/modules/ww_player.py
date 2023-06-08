@@ -37,7 +37,7 @@ class WWVideoPlayer:
         self.mode = VideoPlayerMode.REPEAT
         self.current_video = None
         self.playlist: List[Dict[str, Union[str, VideoPlayerMode]]] = []
-        self.playlist_path = os.path.join(video_dir, "ww_playlist.json")
+        self.playlist_path = os.path.join(video_dir, "playlist.json")
         self.lock = threading.Lock()
         self.current_video_index = 0
         self.display_callback = display_callback
