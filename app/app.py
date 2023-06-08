@@ -51,17 +51,14 @@ class PlayerApp:
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
 
     async def play(self, params):
-        logging.debug("Received play")
         self.video_player.play()
         await self.sock.send_string("OK")
 
     async def pause(self, params):
-        logging.debug("Received pause")
         self.video_player.pause()
         await self.sock.send_string("OK")
 
     async def stop(self, params):
-        logging.debug("Received stop")
         self.video_player.stop()
         await self.sock.send_string("OK")
 
@@ -82,7 +79,6 @@ class PlayerApp:
         
 
     async def get_state(self, params):
-        logging.debug("Received get_state")
         state = "playing" if self.video_player.state == VideoPlayerState.PLAYING else "paused"
         if self.video_player.state == VideoPlayerState.STOPPED:
             state = "stopped"
@@ -96,18 +92,15 @@ class PlayerApp:
             await self.sock.send_string("OK")
 
     async def get_brightness(self, params):
-        logging.debug("Received get_brightness")
         await self.sock.send_string(str(self.display.brightness_level))
 
     async def set_fps(self, params):
-        logging.debug("Received set_fps")
         fps = int(float(params[0])) if params else None
         if fps is not None:
             self.video_player.fps = fps
             await self.sock.send_string("OK")
     
     async def get_fps(self, params):
-        logging.debug("Received get_fps")
         await self.sock.send_string(str(self.video_player.fps))
 
     async def repeat(self, params):
