@@ -7,6 +7,7 @@ import json
 import threading
 import logging
 import socket
+import atexit
 import numpy as np
 from enum import Enum
 from collections import deque
@@ -43,6 +44,8 @@ class WWVideoPlayer:
         self.sender = sacn.sACNsender()
         self.sender.activate_output(1)  # start sending out data in the 1st universe
         self.sender[1].multicast = True
+        self.sender.start()
+        atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
         #  self.playback_thread = None
 
@@ -61,7 +64,6 @@ class WWVideoPlayer:
                     self.stop_event.clear()
                     self.playback_thread = threading.Thread(target=self.playback_loop)
                     logging.debug("Starting playback thread")
-                    self.sender.start()
                     self.playback_thread.start()
 
     def stop(self):
@@ -72,7 +74,6 @@ class WWVideoPlayer:
                 self.state = VideoPlayerState.STOPPED
                 self.playlist.clear()
                 self.current_video = None
-                self.sender.stop()
                 if self.playback_thread and self.playback_thread.is_alive():
                     logging.debug("Stopping playback thread")
                     self.stop_event.set()
@@ -131,6 +132,7 @@ class WWVideoPlayer:
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
                         if frame is not None:
+                            logging.debug("Sending frame")
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
                         else:
@@ -140,9 +142,17 @@ class WWVideoPlayer:
                             elif self.mode == VideoPlayerMode.REPEAT:
                                 self.next_video()
                             elif self.mode == VideoPlayerMode.REPEAT_NONE:
-                                self.stop()
+                                if self.current_video_index < len(self.playlist["playlist"]) - 1:
+                                    self.next_video()
+                                else:
+                                    self.stop()
+                                #  self.stop()
 
-            time.sleep(1 / self.fps)
+            if self.stop_event.wait(1 / self.fps):  # returns immediately if the event is set, else waits for the timeout
+                logging.debug("Stop event set, breaking")
+                #  pass
+                break
+            #  time.sleep(1 / self.fps)
 
     def convert_frame_to_sacn_data(self, frame: np.array) -> List[int]:
         # Convert WW animation frame to sACN data format
@@ -151,10 +161,10 @@ class WWVideoPlayer:
         for i in range(0, len(frame), 3):
             dmx_data.append(frame[i])
         return dmx_data
-        pass
 
     def send_sacn_data(self, data: List[int]):
         self.sender[1].dmx_data = array.array('B', data)
+        #  self.sender.send_dmx(1, data)
 
     def load_playlist(self):
         if os.path.exists(self.playlist_path):
