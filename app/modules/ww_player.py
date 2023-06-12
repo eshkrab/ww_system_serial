@@ -132,7 +132,7 @@ class WWVideoPlayer:
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
                         if frame is not None:
-                            logging.debug("Sending frame")
+                            #  logging.debug("Sending frame")
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
                         else:
