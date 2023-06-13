@@ -45,6 +45,7 @@ class WWVideoPlayer:
         #  self.sender.activate_output(1)  # start sending out data in the 1st universe
         #  self.sender[1].multicast = True
         for i in range(1, 31):
+            self.sender.activate_output(i)  # start sending out data in the 1st universe
             self.sender[i].multicast = True
         self.sender.bind_address = bind_address
         self.sender.start()
