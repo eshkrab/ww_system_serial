@@ -45,6 +45,7 @@ class WWVideoPlayer:
         for i in range(1, 30):
             self.sender.activate_output(i)
             self.sender[i].multicast = True
+        logging.debug("sACN sender activated")
         self.sender.start()
         atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
@@ -134,7 +135,7 @@ class WWVideoPlayer:
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
                         if frame is not None:
-                            #  logging.debug("Sending frame")
+                            logging.debug("Sending frame")
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
                         else:
