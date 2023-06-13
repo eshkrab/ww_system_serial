@@ -167,8 +167,8 @@ class WWVideoPlayer:
     def send_sacn_data(self, data: List[int]):
         #  self.sender[1].dmx_data = array.array('B', data)
         for i in range(1, 30):
-            self.sender[i].dmx_data = array.array('B', data)
-        #  self.sender.send_dmx(1, data)
+            #  self.sender[i].dmx_data = array.array('B', data)
+            self.sender.send_dmx(i, data)
 
     def load_playlist(self):
         if os.path.exists(self.playlist_path):
