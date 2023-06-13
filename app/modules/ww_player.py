@@ -172,6 +172,7 @@ class WWVideoPlayer:
         return dmx_data
 
     def send_sacn_data(self, data: List[int]):
+        logging.debug("bind address %s", self.sender[1].bind_address)
         self.sender[1].dmx_data = array.array('B', data)
         logging.debug("Sending frame")
         #  for i in range(1, 31):
