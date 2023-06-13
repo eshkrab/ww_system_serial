@@ -41,15 +41,17 @@ class WWVideoPlayer:
         self.lock = threading.Lock()
         self.current_video_index = 0
         self.display_callback = display_callback
+
         self.sender = sacn.sACNsender()
+        logging.debug(" sacn Bind address: %s", bind_address)
+        self.sender.bind_address = bind_address
         self.sender.activate_output(1)  # start sending out data in the 1st universe
         self.sender[1].multicast = True
         #  for i in range(1, 31):
         #      self.sender.activate_output(i)  # start sending out data in the 1st universe
         #      self.sender[i].multicast = True
-        self.sender.bind_address = bind_address
-        logging.debug(" sacn Bind address: %s", bind_address)
         self.sender.start()
+
         atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
         #  self.playback_thread = None
