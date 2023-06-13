@@ -43,9 +43,11 @@ class WWVideoPlayer:
         self.display_callback = display_callback
         self.sender = sacn.sACNsender()
         logging.debug("sACN sender 30 universes")
-        for i in range(1, 30):
-            self.sender.activate_output(i)
-            self.sender[i].multicast = True
+        self.sender.activate_output(1)
+        self.sender[1].multicast = True
+        #  for i in range(1, 30):
+        #      self.sender.activate_output(i)
+        #      self.sender[i].multicast = True
         logging.debug("sACN sender activated")
         self.sender.start()
         atexit.register(self.sender.stop)
@@ -169,11 +171,12 @@ class WWVideoPlayer:
         return dmx_data
 
     def send_sacn_data(self, data: List[int]):
-        #  self.sender[1].dmx_data = array.array('B', data)
-        for i in range(1, 30):
-            self.sender[i].dmx_data = array.array('B', data)
-            #  self.sender.send_dmx(i, data)
-            logging.debug("Sending DMX data to universe %d", i)
+        self.sender[1].dmx_data = array.array('B', data)
+        logging.debug("Sending DMX data to universe %d", 1)
+        #  for i in range(1, 30):
+        #      self.sender[i].dmx_data = array.array('B', data)
+        #      #  self.sender.send_dmx(i, data)
+        #      logging.debug("Sending DMX data to universe %d", i)
 
     def load_playlist(self):
         if os.path.exists(self.playlist_path):
