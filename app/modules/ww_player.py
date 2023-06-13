@@ -169,6 +169,7 @@ class WWVideoPlayer:
         for i in range(1, 30):
             #  self.sender[i].dmx_data = array.array('B', data)
             self.sender.send_dmx(i, data)
+            logging.debug("Sending DMX data to universe %d", i)
 
     def load_playlist(self):
         if os.path.exists(self.playlist_path):
