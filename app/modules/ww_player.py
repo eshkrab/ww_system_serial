@@ -139,6 +139,7 @@ class WWVideoPlayer:
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
                         else:
+                            logging.debug("Frame is None")
                             self.current_video = None
                             if self.mode == VideoPlayerMode.REPEAT_ONE:
                                 self.restart_video()
