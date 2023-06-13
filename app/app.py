@@ -146,8 +146,8 @@ class PlayerApp:
         self.sock.close()
         # create a new socket
         new_sock = self.ctx.socket(zmq.REP)
-        new_sock.setsockopt(zmq.RECONNECT_IVL, 1000)  # set reconnect interval to 1s
-        new_sock.setsockopt(zmq.RECONNECT_IVL_MAX, 5000)  # set max reconnect interval to 5s
+        new_sock.setsockopt(zmq.RECONNECT_IVL, 500)  # set reconnect interval to 1s
+        new_sock.setsockopt(zmq.RECONNECT_IVL_MAX, 1000)  # set max reconnect interval to 5s
         # bind the new socket
         try:
             new_sock.bind(f"tcp://{self.config['zmq']['ip_player']}:{self.config['zmq']['port']}")
