@@ -45,7 +45,7 @@ class WWVideoPlayer:
         logging.debug("sACN sender 30 universes")
         self.sender.activate_output(1)
         self.sender[1].multicast = True
-        #  for i in range(1, 30):
+        #  for i in range(1, 31):
         #      self.sender.activate_output(i)
         #      self.sender[i].multicast = True
         logging.debug("sACN sender activated")
