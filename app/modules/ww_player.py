@@ -43,8 +43,9 @@ class WWVideoPlayer:
         self.display_callback = display_callback
 
         self.sender = sacn.sACNsender()
-        logging.debug(" sacn Bind address: %s", bind_address)
+        #  logging.debug(" sacn Bind address: %s", bind_address)
         self.sender.bind_address = bind_address
+
         self.sender.activate_output(1)  # start sending out data in the 1st universe
         self.sender[1].multicast = True
         #  for i in range(1, 31):
