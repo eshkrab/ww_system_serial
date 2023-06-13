@@ -42,6 +42,7 @@ class WWVideoPlayer:
         self.current_video_index = 0
         self.display_callback = display_callback
         self.sender = sacn.sACNsender()
+        logging.debug("sACN sender 30 universes")
         for i in range(1, 30):
             self.sender.activate_output(i)
             self.sender[i].multicast = True
