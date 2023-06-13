@@ -48,6 +48,7 @@ class WWVideoPlayer:
             self.sender.activate_output(i)  # start sending out data in the 1st universe
             self.sender[i].multicast = True
         self.sender.bind_address = bind_address
+        logging.debug(" sacn Bind address: %s", bind_address)
         self.sender.start()
         atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
@@ -169,7 +170,7 @@ class WWVideoPlayer:
 
     def send_sacn_data(self, data: List[int]):
         #  self.sender[1].dmx_data = array.array('B', data)
-        logging.debug("Sending frame")
+        #  logging.debug("Sending frame")
         for i in range(1, 31):
             self.sender[i].dmx_data = array.array('B', data)
         #  self.sender.send_dmx(1, data)
