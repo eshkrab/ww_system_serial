@@ -119,6 +119,7 @@ class WWVideoPlayer:
     def playback_loop(self):
         #  while True:
         while not self.stop_event.is_set():
+            logging.debug("Playback loop")
             with self.lock:
                 if self.state == VideoPlayerState.STOPPED:
                     break
