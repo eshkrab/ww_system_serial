@@ -52,7 +52,7 @@ class PlayerApp:
 
         #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
 
-        self.video_player = WWVideoPlayer(self.ws_queue, config['video_dir'], )
+        self.video_player = WWVideoPlayer(self.ws_queue, config['video_dir'], bind_address=config['sacn']['bind_address'])
 
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
 
