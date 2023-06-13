@@ -165,6 +165,7 @@ class WWVideoPlayer:
 
     def send_sacn_data(self, data: List[int]):
         self.sender[1].dmx_data = array.array('B', data)
+        logging.debug("Sending frame")
         #  self.sender.send_dmx(1, data)
 
     def load_playlist(self):
