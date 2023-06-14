@@ -57,6 +57,7 @@ class PlayerApp:
         self.video_player = WWVideoPlayer(self.ws_queue, video_dir=config['video_dir'], display_callback=self.sacn.send_frame)
 
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
+        self.play(" ")
 
     async def play(self, params):
         self.video_player.play()
