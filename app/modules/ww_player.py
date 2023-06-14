@@ -84,7 +84,7 @@ class WWVideoPlayer:
                     logging.debug("Stopping playback thread")
                     self.stop_event.set()
                     self.playback_thread.join(timeout=1.0)  # Provide a timeout so it doesn't wait indefinitely
-                    if self.playback_thread.is_alive():
+                    if hasattr(self, "playback_thread") or self.playback_thread.is_alive():
                         logging.warning("Playback thread failed to stop, may lead to unstable state.")
                     self.playback_thread = None
         logging.debug("Stopped after lock")
