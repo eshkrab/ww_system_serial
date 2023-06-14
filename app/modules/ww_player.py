@@ -80,7 +80,7 @@ class WWVideoPlayer:
                 self.state = VideoPlayerState.STOPPED
                 self.playlist.clear()
                 self.current_video = None
-                if self.playback_thread and self.playback_thread.is_alive():
+                if hasattr(self, "playback_thread") and self.playback_thread and self.playback_thread.is_alive():
                     logging.debug("Stopping playback thread")
                     self.stop_event.set()
                     self.playback_thread.join(timeout=1.0)  # Provide a timeout so it doesn't wait indefinitely
