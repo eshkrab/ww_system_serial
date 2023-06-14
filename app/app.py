@@ -5,8 +5,9 @@ import asyncio
 import logging
 import json
 #  from modules.video_player import VideoPlayer, VideoPlayerState, VideoPlayerMode
+#  from modules.colorlight import ColorLightDisplay
 from modules.ww_player import WWVideoPlayer, VideoPlayerState, VideoPlayerMode
-from modules.colorlight import ColorLightDisplay
+from modules.sacn_send import SacnSend
 
 class PlayerApp:
     def __init__(self, config):
@@ -49,10 +50,11 @@ class PlayerApp:
         #      brightness_level=config['brightness_level'],
         #      dummy= dummy_key
         #  )
-
+        #
         #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
 
-        self.video_player = WWVideoPlayer(self.ws_queue, config['video_dir'], bind_address=config['sacn']['bind_address'])
+        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key)
+        self.video_player = WWVideoPlayer(self.ws_queue, video_dir=config['video_dir'], display_callback=self.sacn.send_frame)
 
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
 

@@ -7,13 +7,12 @@ import json
 import threading
 import logging
 import socket
-import atexit
+
 import numpy as np
 from enum import Enum
 from collections import deque
 from typing import Callable, Optional, List, Dict, Union
 
-import sacn
 
 from modules.ww_utils import WWFile
 
@@ -47,14 +46,14 @@ class WWVideoPlayer:
         self.playback_thread.start()
         self.playback_thread.join()
 
-        ###### SACN ######
-        self.sender = sacn.sACNsender(bind_address)
-        for i in range(1, 31):
-            self.sender.activate_output(i)  # start sending out data in the 1st universe
-            self.sender[i].multicast = True
-        self.sender.start()
-
-        atexit.register(self.sender.stop)
+        #  ###### SACN ######
+        #  self.sender = sacn.sACNsender(bind_address)
+        #  for i in range(1, 31):
+        #      self.sender.activate_output(i)  # start sending out data in the 1st universe
+        #      self.sender[i].multicast = True
+        #  self.sender.start()
+        #
+        #  atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
 
         self.load_playlist()
@@ -141,8 +140,9 @@ class WWVideoPlayer:
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
                         if frame is not None:
-                            sacn_data = self.convert_frame_to_sacn_data(frame)
-                            self.send_sacn_data(sacn_data)
+                            if self.display_callback:
+                                self.display_callback(frame)
+
                         else:
                             self.current_video = None
                             if self.mode == VideoPlayerMode.REPEAT_ONE:
