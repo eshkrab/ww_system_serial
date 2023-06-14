@@ -8,7 +8,7 @@ class SacnSend:
     def __init__(self, bind_address = "127.0.0.1", universe_count=1, multicast=True, dummy=False):
         self.multi = multicast
         self.sender = sacn.sACNsender(bind_address)
-        self.sender.activate_output(universe)
+
         for i in range(1, universe_count + 1):
             if not dummy:
                 self.sender.activate_output(i)  # start sending out data in the 1st universe
