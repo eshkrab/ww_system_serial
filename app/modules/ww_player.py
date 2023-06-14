@@ -161,21 +161,32 @@ class WWVideoPlayer:
                 break
             #  time.sleep(1 / self.fps)
 
-    def convert_frame_to_sacn_data(self, frame: np.array) -> List[int]:
+    def convert_frame_to_sacn_data(self, frame: np.array) -> List[List[int]]:
         # Convert WW animation frame to sACN data format
-        # implementation goes here
-        dmx_data = array.array('B')
-        for i in range(0, len(frame), 3):
-            dmx_data.append(frame[i])
+        dmx_data = []
+        for i in range(0, len(frame), 510):
+            chunk = frame[i:i+510]
+            chunk_data = array.array('B')
+            for j in range(0, len(chunk), 3):
+                chunk_data.append(chunk[j])
+            dmx_data.append(chunk_data)
         return dmx_data
 
-    def send_sacn_data(self, data: List[int]):
-        #  self.sender[1].dmx_data = array.array('B', data)
-        #  logging.debug("Sending frame")
-        for i in range(1, 31):
-            self.sender[i].dmx_data = array.array('B', data)
-        #  self.sender.send_dmx(1, data)
+    def send_sacn_data(self, data: List[List[int]]):
+        for i in range(len(data)):
+            self.sender[i+1].dmx_data = data[i]
 
+    #  def convert_frame_to_sacn_data(self, frame: np.array) -> List[int]:
+    #      # Convert WW animation frame to sACN data format
+    #      dmx_data = array.array('B')
+    #      for i in range(0, len(frame), 3):
+    #          dmx_data.append(frame[i])
+    #      return dmx_data
+    #
+    #  def send_sacn_data(self, data: List[int]):
+    #      for i in range(1, 31):
+    #          self.sender[i].dmx_data = array.array('B', data)
+    #
     def load_playlist(self):
         if os.path.exists(self.playlist_path):
             with open(self.playlist_path, "r") as f:
