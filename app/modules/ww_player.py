@@ -56,7 +56,7 @@ class WWVideoPlayer:
         #  atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
 
-        self.load_playlist()
+        #  self.load_playlist()
 
     def get_current_video_name(self):
         filepath = self.playlist[self.current_video_index]["filepath"]
