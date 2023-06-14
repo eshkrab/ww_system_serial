@@ -124,8 +124,10 @@ class WWVideoPlayer:
         #      self.display_callback(self.current_video)
 
     def playback_loop(self):
+        logging.debug("Playback loop started")
         while not self.stop_event.is_set():
             with self.lock:
+                logging.debug("Playback loop running")
                 if self.state == VideoPlayerState.STOPPED:
                     break
                 elif self.state == VideoPlayerState.PAUSED:
@@ -153,9 +155,13 @@ class WWVideoPlayer:
                                 else:
                                     self.stop()
 
-            if self.stop_event.wait(1 / self.fps):  # returns immediately if the event is set, else waits for the timeout
+                    logging.debug("Playback loop sleeping")
+
+            if self.stop_event.wait(1 / self.fps):  
+                # returns immediately if the event is set, else waits for the timeout
                 logging.debug("Stop event set, breaking")
                 break
+            logging.debug("Playback loop awake")
     #  def playback_loop(self):
     #      #  while True:
     #      while not self.stop_event.is_set():
