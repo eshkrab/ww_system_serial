@@ -136,10 +136,13 @@ class WWVideoPlayer:
                 elif self.state == VideoPlayerState.PLAYING:
                     if not self.current_video and self.playlist:
                         self.load_video(self.current_video_index)
+                        logging.debug("Loaded video")
 
                     if self.current_video:
+                        logging.debug("Updating video")
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
+                        logging.debug("Got frame")
                         if frame is not None:
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
