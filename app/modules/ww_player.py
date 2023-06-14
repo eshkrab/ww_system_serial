@@ -38,14 +38,17 @@ class WWVideoPlayer:
         self.current_video = None
         self.playlist: List[Dict[str, Union[str, VideoPlayerMode]]] = []
         self.playlist_path = os.path.join(video_dir, "playlist.json")
+
         self.lock = threading.Lock()
         self.current_video_index = 0
         self.display_callback = display_callback
+        
+        self.playback_thread = threading.Thread(target=lambda: None)
+        self.playback_thread.start()
+        self.playback_thread.join()
 
+        ###### SACN ######
         self.sender = sacn.sACNsender(bind_address)
-
-        #  self.sender.activate_output(1)  # start sending out data in the 1st universe
-        #  self.sender[1].multicast = True
         for i in range(1, 31):
             self.sender.activate_output(i)  # start sending out data in the 1st universe
             self.sender[i].multicast = True
@@ -53,7 +56,6 @@ class WWVideoPlayer:
 
         atexit.register(self.sender.stop)
         self.stop_event = threading.Event()  
-        #  self.playback_thread = None
 
         self.load_playlist()
 
@@ -66,7 +68,7 @@ class WWVideoPlayer:
             if self.state != VideoPlayerState.PLAYING:
                 logging.debug("PLAYING")
                 self.state = VideoPlayerState.PLAYING
-                if not hasattr(self, "playback_thread") or not self.playback_thread.is_alive():
+                if not self.playback_thread.is_alive():
                     self.stop_event.clear()
                     self.playback_thread = threading.Thread(target=self.playback_loop)
                     logging.debug("Starting playback thread")
@@ -80,13 +82,12 @@ class WWVideoPlayer:
                 self.state = VideoPlayerState.STOPPED
                 self.playlist.clear()
                 self.current_video = None
-                if hasattr(self, "playback_thread") and self.playback_thread and self.playback_thread.is_alive():
+                if self.playback_thread.is_alive():
                     logging.debug("Stopping playback thread")
                     self.stop_event.set()
                     self.playback_thread.join(timeout=1.0)  # Provide a timeout so it doesn't wait indefinitely
-                    if hasattr(self, "playback_thread") or self.playback_thread.is_alive():
+                    if self.playback_thread.is_alive():
                         logging.warning("Playback thread failed to stop, may lead to unstable state.")
-                    self.playback_thread = None
         logging.debug("Stopped after lock")
 
     def pause(self):
