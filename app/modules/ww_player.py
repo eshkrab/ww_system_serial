@@ -83,7 +83,6 @@ class WWVideoPlayer:
                 self.playlist.clear()
                 self.current_video = None
                 if self.playback_thread.is_alive():
-                    logging.debug("Stopping playback thread")
                     self.stop_event.set()
                     self.playback_thread.join(timeout=1.0)  # Provide a timeout so it doesn't wait indefinitely
                     if self.playback_thread.is_alive():
@@ -124,10 +123,8 @@ class WWVideoPlayer:
         #      self.display_callback(self.current_video)
 
     def playback_loop(self):
-        logging.debug("Playback loop started")
         while not self.stop_event.is_set():
             with self.lock:
-                logging.debug("Playback loop running")
                 if self.state == VideoPlayerState.STOPPED:
                     break
                 elif self.state == VideoPlayerState.PAUSED:
@@ -135,22 +132,17 @@ class WWVideoPlayer:
                     continue
                 elif self.state == VideoPlayerState.PLAYING:
                     if not self.playlist:
-                        logging.debug("No playlist")
                         self.load_playlist()
 
                     if not self.current_video and self.playlist:
                         self.load_video(self.current_video_index)
-                        logging.debug("Loaded video")
 
                     if self.current_video:
-                        logging.debug("Updating video")
                         self.current_video.update()
                         frame = self.current_video.get_next_frame()
-                        logging.debug("Got frame")
                         if frame is not None:
                             sacn_data = self.convert_frame_to_sacn_data(frame)
                             self.send_sacn_data(sacn_data)
-                            logging.debug("Sending frame")
                         else:
                             self.current_video = None
                             if self.mode == VideoPlayerMode.REPEAT_ONE:
@@ -163,53 +155,11 @@ class WWVideoPlayer:
                                 else:
                                     self.stop()
 
-                    logging.debug("Playback loop sleeping")
 
             if self.stop_event.wait(1 / self.fps):  
                 # returns immediately if the event is set, else waits for the timeout
                 logging.debug("Stop event set, breaking")
                 break
-            logging.debug("Playback loop awake")
-    #  def playback_loop(self):
-    #      #  while True:
-    #      while not self.stop_event.is_set():
-    #          with self.lock:
-    #              if self.state == VideoPlayerState.STOPPED:
-    #                  break
-    #
-    #              elif self.state == VideoPlayerState.PAUSED:
-    #                  time.sleep(0.01)
-    #                  continue
-    #
-    #              elif self.state == VideoPlayerState.PLAYING:
-    #                  if not self.current_video and self.playlist:
-    #                      self.load_video(self.current_video_index)
-    #
-    #                  if self.current_video:
-    #                      self.current_video.update()
-    #                      frame = self.current_video.get_next_frame()
-    #                      if frame is not None:
-    #                          #  logging.debug("Sending frame")
-    #                          sacn_data = self.convert_frame_to_sacn_data(frame)
-    #                          self.send_sacn_data(sacn_data)
-    #                      else:
-    #                          self.current_video = None
-    #                          if self.mode == VideoPlayerMode.REPEAT_ONE:
-    #                              self.restart_video()
-    #                          elif self.mode == VideoPlayerMode.REPEAT:
-    #                              self.next_video()
-    #                          elif self.mode == VideoPlayerMode.REPEAT_NONE:
-    #                              if self.current_video_index < len(self.playlist["playlist"]) - 1:
-    #                                  self.next_video()
-    #                              else:
-    #                                  self.stop()
-    #                              #  self.stop()
-    #
-    #          if self.stop_event.wait(1 / self.fps):  # returns immediately if the event is set, else waits for the timeout
-    #              logging.debug("Stop event set, breaking")
-    #              #  pass
-    #              break
-    #          #  time.sleep(1 / self.fps)
 
     def convert_frame_to_sacn_data(self, frame: np.array) -> List[List[int]]:
         # Convert WW animation frame to sACN data format
