@@ -31,6 +31,7 @@ class SacnSend:
     def send_sacn_data(self, data: List[List[int]]):
         for i in range(len(data)):
             self.sender[i+1].dmx_data = data[i]
+            logging.debug(f"Sending universe {i+1} with data {data[i]}")
 
 
     #  def convert_frame_to_sacn_data(self, frame: np.array) -> List[List[int]]:
