@@ -29,7 +29,7 @@ class SacnSend:
             dmx_data.append(list(chunk))
         return dmx_data
 
-    def send_scan_data(self, data: List[List[int]]):
+    def send_sacn_data(self, data: List[List[int]]):
         for i in range(len(data)):
             # scale data by brightness
             brightness = self.brightness/255
