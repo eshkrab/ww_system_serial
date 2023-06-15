@@ -6,7 +6,7 @@ import numpy as np
 from typing import Callable, Optional, List, Dict, Union
 
 class SacnSend:
-    def __init__(self, bind_address = "127.0.0.1", universe_count=1, multicast=True, dummy=False, brightness = 1.0):
+    def __init__(self, bind_address = "127.0.0.1", universe_count=1, multicast=True, dummy=False, brightness = 50.0):
         self.multi = multicast
         self.sender = sacn.sACNsender(bind_address)
         self.brightness = brightness
