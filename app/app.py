@@ -95,8 +95,8 @@ class PlayerApp:
         await self.sock.send_string(str(state))
 
     async def set_brightness(self, params):
-        logging.debug("Received set_brightness")
-        brightness = int(params[0]) if params else None
+        logging.debug("Received set_brightness" + str(params))
+        brightness = int(float(params[0])) if params else None
         if brightness is not None:
             #  self.display.brightness_level = int(brightness)
             logging.debug("Received set_brightness: " + str(brightness))
