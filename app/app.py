@@ -96,7 +96,7 @@ class PlayerApp:
 
     async def set_brightness(self, params):
         logging.debug("Received set_brightness")
-        brightness = float(params[0]) if params else None
+        brightness = int(params[0]) if params else None
         if brightness is not None:
             #  self.display.brightness_level = int(brightness)
             logging.debug("Received set_brightness: " + str(brightness))
