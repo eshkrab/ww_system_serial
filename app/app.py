@@ -103,6 +103,7 @@ class PlayerApp:
             await self.sock.send_string("OK")
 
     async def get_brightness(self, params):
+        logging.debug("Received get_brightness ${self.sacn.brightness} ")
         await self.sock.send_string(str(self.sacn.brightness))
 
     async def set_fps(self, params):
