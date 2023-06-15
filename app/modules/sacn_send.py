@@ -6,9 +6,10 @@ import numpy as np
 from typing import Callable, Optional, List, Dict, Union
 
 class SacnSend:
-    def __init__(self, bind_address = "127.0.0.1", universe_count=1, multicast=True, dummy=False):
+    def __init__(self, bind_address = "127.0.0.1", universe_count=1, multicast=True, dummy=False, brightness = 1.0):
         self.multi = multicast
         self.sender = sacn.sACNsender(bind_address)
+        self.brightness = brightness
 
         for i in range(1, universe_count + 1):
             if not dummy:
@@ -28,11 +29,18 @@ class SacnSend:
             dmx_data.append(list(chunk))
         return dmx_data
 
-
-    def send_sacn_data(self, data: List[List[int]]):
+    def send_scan_data(self, data: List[List[int]]):
         for i in range(len(data)):
-            self.sender[i+1].dmx_data = data[i]
-            #  logging.debug(f"Sending universe {i+1} with data {data[i]}")
+            # scale data by brightness
+            scaled_data = [round(self.brightness * byte) for byte in data[i]]
+            self.sender[i+1].dmx_data = scaled_data
+
+    #  def send_sacn_data(self, data: List[List[int]]):
+    #      for i in range(len(data)):
+    #          #scale data by brightness
+    #          self.sender[i+1].dmx_data = (data[i] )
+    #          #  * self.brightness).astype(np.uint8
+    #          #  logging.debug(f"Sending universe {i+1} with data {data[i]}")
 
 
     #  def convert_frame_to_sacn_data(self, frame: np.array) -> List[List[int]]:
