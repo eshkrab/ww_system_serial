@@ -53,7 +53,7 @@ class PlayerApp:
         #
         #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
 
-        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key, multicast = config['sacn']['multicast'] == 1 , universe_count=config['sacn']['universe_count'])
+        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key, brightness=config['brightness_level'], multicast = config['sacn']['multicast'] == 1 , universe_count=config['sacn']['universe_count'])
         self.video_player = WWVideoPlayer(self.ws_queue, video_dir=config['video_dir'], display_callback=self.sacn.send_frame)
 
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
@@ -99,13 +99,13 @@ class PlayerApp:
         brightness = float(params[0]) if params else None
         if brightness is not None:
             #  self.display.brightness_level = int(brightness)
+            logging.debug("Received set_brightness: " + str(brightness))
             self.sacn.brightness= int(brightness)
             await self.sock.send_string("OK")
 
     async def get_brightness(self, params):
         #  logging.debug("Received get_brightness $d ", self.sacn.brightness)
-        logging.debug("Received get_brightness")
-        logging.debug(self.sacn.brightness)
+        logging.debug("Received get_brightness"+ str(self.sacn.brightness)
         await self.sock.send_string(str(self.sacn.brightness))
 
     async def set_fps(self, params):
