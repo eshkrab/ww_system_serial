@@ -53,7 +53,7 @@ class PlayerApp:
         #
         #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
 
-        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key, universe_count=config['sacn']['universe_count'])
+        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key, multicast = config['sacn']['multicast'] is 1 , universe_count=config['sacn']['universe_count'])
         self.video_player = WWVideoPlayer(self.ws_queue, video_dir=config['video_dir'], display_callback=self.sacn.send_frame)
 
         logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
