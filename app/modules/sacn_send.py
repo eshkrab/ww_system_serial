@@ -34,7 +34,8 @@ class SacnSend:
             # scale data by brightness
             #  scaled_data = [round(self.brightness / 255 * byte) for byte in data[i]]
             scaled_data = [round(byte * float(self.brightness / 255.0)) for byte in data[i]]
-            logging.debug(f"Sending universe {i+1} with data {scaled_data[0]}, og data {data[i][0]} brightness {self.brightness} ")
+            if i == 0:
+                logging.debug(f"Sending universe {i+1} with data {scaled_data[0]}, og data {data[i][0]} brightness {self.brightness} ")
             self.sender[i+1].dmx_data = scaled_data
 
     #  def send_sacn_data(self, data: List[List[int]]):
