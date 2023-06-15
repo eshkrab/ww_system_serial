@@ -32,7 +32,8 @@ class SacnSend:
     def send_scan_data(self, data: List[List[int]]):
         for i in range(len(data)):
             # scale data by brightness
-            scaled_data = [round(self.brightness * byte) for byte in data[i]]
+            brightness = self.brightness/255
+            scaled_data = [round(brightness * byte) for byte in data[i]]
             self.sender[i+1].dmx_data = scaled_data
 
     #  def send_sacn_data(self, data: List[List[int]]):

@@ -99,7 +99,7 @@ class PlayerApp:
         brightness = float(params[0]) if params else None
         if brightness is not None:
             #  self.display.brightness_level = int(brightness)
-            self.sacn.brightness= float(brightness)
+            self.sacn.brightness= int(brightness)
             await self.sock.send_string("OK")
 
     async def get_brightness(self, params):
