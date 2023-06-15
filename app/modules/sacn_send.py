@@ -1,6 +1,7 @@
 import sacn
 import atexit
 import array
+import logging
 import numpy as np
 from typing import Callable, Optional, List, Dict, Union
 
