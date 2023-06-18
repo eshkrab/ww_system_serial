@@ -71,9 +71,22 @@ async def send_message_to_player(message):
 
 async def subscribe_to_player():
     logging.debug("Subscribing to Player")
+
+    poller = zmq.Poller()
+    poller.register(sub_socket, zmq.POLLIN)
+
     while True:
-        message = await sub_socket.recv_string()
-        logging.debug(f"Received from Player: {message}")
+        socks = dict(poller.poll(100))
+
+        # If there's a message on the socket, receive and process it
+        logging.debug(f"socks: {socks}")
+        if sub_socket in socks:
+            message = sub_socket.recv()
+            logging.debug(f"Received from Player: {message}")
+
+
+        #  message = await sub_socket.recv_string()
+        #  logging.debug(f"Received from Player: {message}")
 
         # Process the received message
         message = message.split(" ")
