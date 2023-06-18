@@ -1,6 +1,7 @@
 import json
 import logging
 import serial
+import asyncio
 import zmq
 import zmq.asyncio
 
@@ -129,7 +130,10 @@ async def main():
 
 # Start the event loop
 zmq.asyncio.install()
-loop = zmq.asyncio.ZMQEventLoop()
+loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-loop.run_until_complete(main())
+try:
+    loop.run_until_complete(main())
+finally:
+    loop.close()            
 
