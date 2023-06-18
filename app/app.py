@@ -43,8 +43,8 @@ player = Player(brightness=config['brightness_level'], fps=config['fps'])
 ########################
 # SERIAL
 ########################
-serial_port = config['serial_port']
-serial_baudrate = config['serial_baudrate']
+serial_port = config['serial']['port']
+serial_baudrate = config['serial']['baudrate']
 ser = serial.Serial(serial_port, serial_baudrate)
 
 ########################
