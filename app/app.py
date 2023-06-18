@@ -1,208 +1,70 @@
-from os import name
-import zmq
-import zmq.asyncio
-import asyncio
-import logging
 import json
-#  from modules.video_player import VideoPlayer, VideoPlayerState, VideoPlayerMode
-#  from modules.colorlight import ColorLightDisplay
-from modules.ww_player import WWVideoPlayer, VideoPlayerState, VideoPlayerMode
-from modules.sacn_send import SacnSend
+import logging
+import serial
+import zmq.asyncio
 
-class PlayerApp:
-    def __init__(self, config):
-        self.config = config
-        self.ctx = zmq.asyncio.Context()
-        self.sock = self.ctx.socket(zmq.REP)
-        self.sock.setsockopt(zmq.RECONNECT_IVL, 1000)  # set reconnect interval to 1s
-        self.sock.setsockopt(zmq.RECONNECT_IVL_MAX, 5000)  # set max reconnect interval to 5s
-        self.ws_queue = asyncio.Queue()
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 
-        self.command_dict = {
-            "play": self.play,
-            "pause": self.pause,
-            "stop": self.stop,
-            "restart": self.restart,
-            "prev": self.prev,
-            "next": self.next,
-            "get_state": self.get_state,
-            "set_brightness": self.set_brightness,
-            "get_brightness": self.get_brightness,
-            "repeat": self.repeat,
-            "repeat_one": self.repeat_one,
-            "repeat_none": self.repeat_none,
-            #  "get_mode": self.get_mode,
-            "set_fps": self.set_fps,
-            "get_fps": self.get_fps,
-            "get_current_media": self.get_current_video,
-            #  "set_playlist": self.set_playlist
-        }
+# Load configuration from JSON file
+with open('config/config.json', 'r') as f:
+    config = json.load(f)
 
+# Set up ZeroMQ context and socket
+ctx = zmq.asyncio.Context()
+socket = ctx.socket(zmq.REQ)
+socket.connect(f"tcp://{config['zmq']['ip_server']}:{config['zmq']['port']}")
 
-        #handle dummy config setting
-        dummy_key_s = self.config['debug']['dummy_send']
-        dummy_key = False
-        if dummy_key_s == "True":
-            dummy_key = True
+# Set up Serial port
+serial_port = config['serial_port']
+serial_baudrate = config['serial_baudrate']
+ser = serial.Serial(serial_port, serial_baudrate)
 
-        #  self.display = ColorLightDisplay(
-        #      interface=config['interface'],
-        #      brightness_level=config['brightness_level'],
-        #      dummy= dummy_key
-        #  )
-        #
-        #  self.video_player = VideoPlayer(self.ws_queue, config['video_dir'], display_callback=self.display.display_frame)
+async def send_message_to_player(message):
+    try:
+        logging.debug(f"Sending message: {message}")
+        await socket.send_string(message)
+        reply = await socket.recv_string()
+        return reply
+    except zmq.ZMQError as e:
+        logging.error(f"ZMQError while sending/receiving message: {e}")
+        return -1
 
-        self.sacn = SacnSend(config['sacn']['bind_address'], dummy=dummy_key, brightness=config['brightness_level'], multicast = config['sacn']['multicast'] == 1 , universe_count=config['sacn']['universe_count'])
-        self.video_player = WWVideoPlayer(self.ws_queue, video_dir=config['video_dir'], display_callback=self.sacn.send_frame)
-
-        logging.basicConfig(level=self.get_log_level(config['debug']['log_level']))
-        self.video_player.play()
-
-    async def play(self, params):
-        self.video_player.play()
-        await self.sock.send_string("OK")
-
-    async def pause(self, params):
-        self.video_player.pause()
-        await self.sock.send_string("OK")
-
-    async def stop(self, params):
-        self.video_player.stop()
-        await self.sock.send_string("OK")
-
-    async def restart(self, params):
-        logging.debug("Received restart")
-        self.video_player.restart_video()
-        await self.sock.send_string("OK")
-
-    async def prev(self, params):
-        logging.debug("Received prev")
-        self.video_player.prev_video()
-        await self.sock.send_string("OK")
-
-    async def next(self, params):
-        logging.debug("Received next")
-        self.video_player.next_video()
-        await self.sock.send_string("OK")
+async def handle_zmq_to_serial():
+    while True:
+        message = await socket.recv_string()
+        logging.debug(f"Received message from ZeroMQ: {message}")
         
+        # Write the message to the serial port
+        ser.write(message.encode())
 
-    async def get_state(self, params):
-        state = "playing" if self.video_player.state == VideoPlayerState.PLAYING else "paused"
-        if self.video_player.state == VideoPlayerState.STOPPED:
-            state = "stopped"
-            logging.debug("Received get_state: " + state)
-        await self.sock.send_string(str(state))
+async def handle_serial_to_zmq():
+    while True:
+        if ser.in_waiting > 0:
+            data = ser.readline().decode().strip()
+            logging.debug(f"Received data from serial port: {data}")
 
-    async def set_brightness(self, params):
-        params = params.split(' ')
-        brightness = int(float(params[1])) if params else None
-        if brightness is not None:
-            #  self.display.brightness_level = int(brightness)
-            #  logging.debug("Received set_brightness: " + str(brightness))
-            self.sacn.brightness= int(brightness)
-            await self.sock.send_string("OK")
+            # Process the data or send it to ZeroMQ
+            # Example: Send the data as a message to ZeroMQ
+            reply = await send_message_to_player(f"process_data {data}")
+            logging.debug(f"Reply from player: {reply}")
 
-    async def get_brightness(self, params):
-        #  logging.debug("Received get_brightness"+ str(self.sacn.brightness))
-        await self.sock.send_string(str(self.sacn.brightness))
+# Example usage
+async def example_usage():
+    # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
+    tasks = [
+        handle_zmq_to_serial(),
+        handle_serial_to_zmq()
+    ]
+    await asyncio.gather(*tasks)
 
-    async def set_fps(self, params):
-        params = params.split(' ')
-        fps = int(float(params[1])) if params else None
-        if fps is not None:
-            self.video_player.fps = fps
-            await self.sock.send_string("OK")
-    
-    async def get_fps(self, params):
-        await self.sock.send_string(str(self.video_player.fps))
+# Run the example usage in an event loop
+async def main():
+    await example_usage()
 
-    async def repeat(self, params):
-        logging.debug("Received repeat")
-        self.video_player.mode = VideoPlayerMode.REPEAT
-        await self.sock.send_string("OK")
-
-    async def repeat_one(self, params):
-        logging.debug("Received repeat_one")
-        self.video_player.mode = VideoPlayerMode.REPEAT_ONE
-        await self.sock.send_string("OK")
-
-    async def repeat_none(self, params):
-        logging.debug("Received repeat_none")
-        self.video_player.mode = VideoPlayerMode.REPEAT_NONE
-        await self.sock.send_string("OK")
-
-    async def get_current_video(self, params):
-        #return current video name
-        await self.sock.send_string(self.video_player.get_current_video_name())
-        #  await self.sock.send_string(self.video_player.current_video)
-
-
-    def get_log_level(self, level):
-        levels = {
-            'DEBUG': logging.DEBUG,
-            'INFO': logging.INFO,
-            'WARNING': logging.WARNING,
-            'ERROR': logging.ERROR,
-            'CRITICAL': logging.CRITICAL
-        }
-        return levels.get(level.upper(), logging.INFO)
-
-    def reset_socket(self):
-        # close the current socket
-        self.sock.close()
-        # create a new socket
-        new_sock = self.ctx.socket(zmq.REP)
-        new_sock.setsockopt(zmq.RECONNECT_IVL, 1000)  # set reconnect interval to 1s
-        new_sock.setsockopt(zmq.RECONNECT_IVL_MAX, 5000)  # set max reconnect interval to 5s
-        # bind the new socket
-        try:
-            new_sock.bind(f"tcp://{self.config['zmq']['ip_player']}:{self.config['zmq']['port']}")
-        except zmq.ZMQError as zmq_error:
-            logging.error(f"ZMQ Error occurred during socket reset: {str(zmq_error)}")
-        return new_sock
- 
-
-    async def run(self):
-        self.sock.bind(f"tcp://{self.config['zmq']['ip_player']}:{self.config['zmq']['port']}")
-
-        while True:
-            try:
-                message = await self.sock.recv_string()
-                await self.process_message(message)
-
-            except zmq.ZMQError as zmq_error:
-                logging.error(f"ZMQ Error occurred: {str(zmq_error)}")
-                self.sock = self.reset_socket()  # reset the socket when a ZMQError occurs
-        
-            except Exception as e:
-                logging.error(f"An error occurred: {str(e)}")
-                await self.sock.send_string(f"An error occurred: {str(e)}")
-
-    async def process_message(self, message):
-        try:
-            command = message.split(' ', 1)[0]
-            logging.debug(f"Received command: {command}")
-
-            if command in self.command_dict:  # check if command exists in command_dict
-                await self.command_dict[command](message)
-            else:
-                await self.sock.send_string("Unknown command")
-                logging.warning(f"Unknown command received: {command}")
-        except Exception as e:
-            logging.error(f"Error processing message: {str(e)}")
-            await self.sock.send_string(f"Error processing message: {str(e)}")
-
-
-
-def load_config(config_file):
-    with open(config_file, 'r') as f:
-        config = json.load(f)
-    return config
-
-
-if __name__ == "__main__":
-    config = load_config('config/config.json')
-    app = PlayerApp(config)
-    asyncio.run(app.run())
+# Start the event loop
+zmq.asyncio.install()
+loop = zmq.asyncio.ZMQEventLoop()
+asyncio.set_event_loop(loop)
+loop.run_until_complete(main())
 

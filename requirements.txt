@@ -1,8 +1,5 @@
 # requirements.txt
 numpy
-opencv-python-headless
+serial
 zmq
-aiohttp
 asyncio
-opencv-python
-sacn
