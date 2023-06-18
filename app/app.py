@@ -122,7 +122,8 @@ async def example_usage():
     asyncio.create_task(subscribe_to_player())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
-        asyncio.create_task(handle_zmq_to_serial()),
+        #  asyncio.create_task(handle_zmq_to_serial()),
+        logging.info("Starting serial to zmq")
         asyncio.create_task(handle_serial_to_zmq())
     ]
     await asyncio.gather(*tasks)
@@ -132,7 +133,7 @@ async def main():
     await example_usage()
 
 # Start the event loop
-zmq.asyncio.install()
+#  zmq.asyncio.install()
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 try:
