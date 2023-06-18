@@ -54,7 +54,7 @@ ser = serial.Serial(serial_port, serial_baudrate)
 ctx = zmq.asyncio.Context()
 # Publish to the player app
 pub_socket = ctx.socket(zmq.PUB)
-pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_server_pub']}")  # Publish to the player app
+pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_pub']}")  # Publish to the player app
 
 # Subscribe to the player app
 sub_socket = ctx.socket(zmq.SUB)
