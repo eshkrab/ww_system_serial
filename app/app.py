@@ -70,6 +70,7 @@ async def send_message_to_player(message):
         return -1
 
 async def subscribe_to_player():
+    logging.debug("Subscribing to Player")
     while True:
         message = await sub_socket.recv_string()
         logging.debug(f"Received from Player: {message}")
@@ -90,7 +91,7 @@ async def subscribe_to_player():
         else:
             logging.error(f"Unknown message from Player: {message}")
 
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.1)
 
 
 async def handle_zmq_to_serial():
