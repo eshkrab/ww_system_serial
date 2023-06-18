@@ -121,9 +121,9 @@ async def example_usage():
     # Start listening to messages from player app
     asyncio.create_task(subscribe_to_player())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
+    logging.info("Starting serial to zmq")
     tasks = [
         #  asyncio.create_task(handle_zmq_to_serial()),
-        logging.info("Starting serial to zmq")
         asyncio.create_task(handle_serial_to_zmq)
     ]
     await asyncio.gather(*tasks)
