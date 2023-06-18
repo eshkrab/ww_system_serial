@@ -124,7 +124,7 @@ async def example_usage():
     logging.info("Starting serial to zmq")
     tasks = [
         #  asyncio.create_task(handle_zmq_to_serial()),
-        asyncio.create_task(handle_serial_to_zmq)
+        asyncio.create_task(handle_serial_to_zmq())
     ]
     await asyncio.gather(*tasks)
 
