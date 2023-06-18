@@ -119,7 +119,7 @@ async def example_usage():
     asyncio.create_task(subscribe_to_player())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
-        #  asyncio.create_task(handle_zmq_to_serial()),
+        asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
     await asyncio.gather(*tasks)
