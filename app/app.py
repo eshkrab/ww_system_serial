@@ -84,6 +84,7 @@ async def subscribe_to_player():
             message = sub_socket.recv()
             logging.debug(f"Received from Player: {message}")
 
+        break
 
         #  message = await sub_socket.recv_string()
         #  logging.debug(f"Received from Player: {message}")
