@@ -104,7 +104,9 @@ async def handle_zmq_to_serial():
 
 async def handle_serial_to_zmq():
     while True:
-        if ser.in_waiting > 0:
+        logging.debug("Checking serial port for data")
+        if ser.in_waiting:
+            logging.debug("Data available on serial port")
             data = ser.readline().decode().strip()
             logging.debug(f"Received data from serial port: {data}")
 
@@ -115,6 +117,7 @@ async def handle_serial_to_zmq():
 
 # Example usage
 async def example_usage():
+    logging.info("Starting example usage")
     # Start listening to messages from player app
     asyncio.ensure_future(subscribe_to_player())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
