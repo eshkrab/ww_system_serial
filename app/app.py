@@ -108,9 +108,10 @@ async def monitor_socket():
         #  logging.debug(f"time.time(): {time.time()}")
 
         # Check if it's been 1 minute since last message received
-        if time.time() - LAST_MSG_TIME > 60:
-            sub_socket = reset_socket()
+        if time.time() - LAST_MSG_TIME > 10:
+            sub_socket = monitor_socket()
             LAST_MSG_TIME = time.time()
+
         await asyncio.sleep(1)
 
 
@@ -182,6 +183,7 @@ async def handle_serial_to_zmq():
 async def example_usage():
     # Start listening to messages from player app
     asyncio.create_task(subscribe_to_player())
+    asyncio.create_task(reset_socket())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
         asyncio.create_task(handle_zmq_to_serial()),
