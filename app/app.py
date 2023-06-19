@@ -60,7 +60,7 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 sub_socket = ctx.socket(zmq.SUB)
 sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
 #  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-sub_socket.setsockopt_string(zmq.SUBSCRIBE, b'brightess')
+sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightess')
 
 async def send_message_to_player(message):
     try:
