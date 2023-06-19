@@ -99,8 +99,6 @@ async def monitor_socket():
     global LAST_MSG_TIME
     logging.debug("Monitoring socket")
     while True:
-        #  logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
-        #  logging.debug(f"time.time(): {time.time()}")
 
         logging.debug(f"Time since last message: {time.time() - LAST_MSG_TIME}")
         # Check if it's been 1 minute since last message received
@@ -126,20 +124,15 @@ async def subscribe_to_player():
         # Process the received message
         message = message.split(" ")
         if message[0] == "state":
-            logging.debug(f"Received state message: {message}")
             player.state = message[1]
         elif message[0] == "mode":
-            logging.debug(f"Received mode message: {message}")
             player.mode = message[1]
         elif message[0] == "brightness":
-            logging.debug(f"Received brightness message: {message}")
             brightness = float(message[1]) / 255.0
             player.brightness = float(brightness)
         elif message[0] == "fps":
-            logging.debug(f"Received fps message: {message}")
             player.fps = int(message[1])
         elif message[0] == "current_media":
-            logging.debug(f"Received current_media message: {message}")
             player.current_media = message[1]
         else:
             logging.error(f"Unknown message from Player: {message}")
@@ -155,17 +148,19 @@ async def handle_zmq_to_serial():
         
         # Write the message to the serial port
         ser.write(message.encode())
+        await asyncio.sleep(0.01)
 
 async def handle_serial_to_zmq():
     while True:
         if ser.in_waiting:
             data = ser.readline().decode().strip()
-            logging.debug(f"Received data from serial port: {data}")
+            logging.debug(f"Received data from Serial: {data}")
 
             # Process the data or send it to ZeroMQ
             # Example: Send the data as a message to ZeroMQ
             #  await send_message_to_player(f"process_data {data}")
             #  logging.debug(f"Reply from player: {reply}")
+        await asyncio.sleep(0.01)
 
 # Run the example usage in an event loop
 async def main():
@@ -175,7 +170,7 @@ async def main():
 
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
-        asyncio.create_task(handle_zmq_to_serial()),
+        #  asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
     await asyncio.gather(*tasks)
