@@ -183,3 +183,6 @@ async def main():
 # Start the event loop
 if __name__ == '__main__':
     asyncio.run(main())
+
+# Close Serial Port
+ser.close()
