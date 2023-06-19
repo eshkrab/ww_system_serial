@@ -64,8 +64,7 @@ sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 
-def reset_socket():
-    global sub_socket
+def reset_socket(sub_socket):
     logging.debug("Resetting socket")
     # close the current socket
     sub_socket.close()
