@@ -146,7 +146,6 @@ async def subscribe_to_player():
 
 async def handle_zmq_to_serial():
     while True:
-        print("handle_zmq_to_serial")
         #  #  message = await socket.recv_string()
         #  message = "serial test"
         #  #  logging.debug(f"Received message from ZeroMQ: {message}")
