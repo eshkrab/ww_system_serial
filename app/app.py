@@ -67,6 +67,7 @@ sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
 LAST_MSG_TIME = time.time()
 
 def reset_socket():
+    global sub_socket
     logging.debug("Resetting socket")
     # close the current socket
     sub_socket.close()
@@ -98,6 +99,7 @@ async def send_message_to_player(message):
         return -1
 
 async def subscribe_to_player():
+    global sub_socket
     logging.debug("Subscribing to Player")
 
     poller = zmq.Poller()
