@@ -123,6 +123,7 @@ async def subscribe_to_player():
     while True:
         message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
+        logging.debug(f"Received message from Player: {message}")
 
 
         # Process the received message
