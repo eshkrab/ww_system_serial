@@ -108,6 +108,7 @@ async def monitor_socket():
         #  logging.debug(f"time.time(): {time.time()}")
 
         # Check if it's been 1 minute since last message received
+        logging.debug(f"Time since last message: {time.time() - LAST_MSG_TIME}")
         if time.time() - LAST_MSG_TIME > 10:
             logging.debug("Resetting socket")
             sub_socket = reset_socket()
