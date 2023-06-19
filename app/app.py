@@ -123,10 +123,10 @@ async def subscribe_to_player():
     logging.debug("SUBSCRIBED to player")
 
     while True:
-        logging.debug("Waiting for message from player")
+        #  logging.debug("Waiting for message from player")
         message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
-        logging.debug(f"Received from Player: {message}")
+        #  logging.debug(f"Received from Player: {message}")
 
 
         # Process the received message
@@ -161,7 +161,7 @@ async def handle_zmq_to_serial():
 
 async def handle_serial_to_zmq():
     while True:
-        #  print("handle_serial_to_zmq")
+        logging.debug("handle_serial_to_zmq")
         if ser.in_waiting:
             data = ser.readline().decode().strip()
             logging.debug(f"Received data from Serial: {data}")
