@@ -159,15 +159,13 @@ async def handle_serial_to_zmq():
     while True:
         if ser.in_waiting:
             data = ser.readline().decode().strip()
-            logging.debug(f"Received data from Serial: {data}")
-            await send_message_to_player(f"process_data {data}")
-            logging.debug("sending to player ")
+            await send_message_to_player("imu {data}")
         #
         #      # Process the data or send it to ZeroMQ
         #      # Example: Send the data as a message to ZeroMQ
         #      #  await send_message_to_player(f"process_data {data}")
         #      #  logging.debug(f"Reply from player: {reply}")
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.05)
 
 async def main():
     # Start listening to messages from player app and monitor the socket
