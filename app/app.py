@@ -80,31 +80,31 @@ async def subscribe_to_player():
 
         # If there's a message on the socket, receive and process it
         logging.debug(f"socks: {socks}")
+
         if sub_socket in socks:
             message = sub_socket.recv()
             logging.debug(f"Received from Player: {message}")
 
-        break
 
-        #  message = await sub_socket.recv_string()
-        #  logging.debug(f"Received from Player: {message}")
-
-        # Process the received message
-        message = message.split(" ")
-        if message[0] == "state":
-            player.state = message[1]
-        elif message[0] == "mode":
-            player.mode = message[1]
-        elif message[0] == "brightness":
-            brightness = float(message[1]) / 255.0
-            player.brightness = float(brightness)
-        elif message[0] == "fps":
-            player.fps = int(message[1])
-        elif message[0] == "current_media":
-            player.current_media = message[1]
-        else:
-            logging.error(f"Unknown message from Player: {message}")
-
+        #  #  message = await sub_socket.recv_string()
+        #  #  logging.debug(f"Received from Player: {message}")
+        #
+        #  # Process the received message
+        #  message = message.split(" ")
+        #  if message[0] == "state":
+        #      player.state = message[1]
+        #  elif message[0] == "mode":
+        #      player.mode = message[1]
+        #  elif message[0] == "brightness":
+        #      brightness = float(message[1]) / 255.0
+        #      player.brightness = float(brightness)
+        #  elif message[0] == "fps":
+        #      player.fps = int(message[1])
+        #  elif message[0] == "current_media":
+        #      player.current_media = message[1]
+        #  else:
+        #      logging.error(f"Unknown message from Player: {message}")
+        #
         await asyncio.sleep(0.1)
 
 
