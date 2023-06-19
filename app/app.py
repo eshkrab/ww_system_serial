@@ -59,8 +59,9 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 # Subscribe to the player app
 sub_socket = ctx.socket(zmq.SUB)
 sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
+logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 #  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightess')
+sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
 
 async def send_message_to_player(message):
     try:
@@ -84,7 +85,7 @@ async def subscribe_to_player():
         logging.debug(f"socks: {socks}")
 
         if sub_socket in socks:
-            message = sub_socket.recv()
+            message = sub_socket.recv_multipart()
             logging.debug(f"Received from Player: {message}")
 
 
