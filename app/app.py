@@ -2,6 +2,7 @@ import json
 import logging
 import serial
 import asyncio
+import time
 import zmq
 import zmq.asyncio
 
@@ -63,6 +64,31 @@ logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq'
 #  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
 
+LAST_MSG_TIME = time.time()
+
+def reset_socket():
+    logging.debug("Resetting socket")
+    # close the current socket
+    sub_socket.close()
+    # create a new socket
+    new_sock = ctx.socket(zmq.SUB)
+    new_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
+    logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+    new_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+
+    # bind the new socket
+    try:
+        logging.debug(f"OPENING UP SOCKET AGAIN to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+
+        new_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
+        new_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+
+
+    except zmq.ZMQError as zmq_error:
+        logging.error(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+        logging.error(f"ZMQ Error occurred during socket reset: {str(zmq_error)}")
+    return new_sock
+
 async def send_message_to_player(message):
     try:
         logging.debug(f"Publishing message: {message}")
@@ -81,12 +107,24 @@ async def subscribe_to_player():
         logging.debug("Waiting for message from Player")
         socks = dict(poller.poll(100))
 
-        # If there's a message on the socket, receive and process it
+        # Check if it's been 1 minute since last message received
+        if time.time() - LAST_MSG_TIME > 60:
+            sub_socket = reset_socket()
+            poller.register(sub_socket, zmq.POLLIN)
+            LAST_MSG_TIME = time.time()
+
         logging.debug(f"socks: {socks}")
 
         if sub_socket in socks:
             message = sub_socket.recv_multipart()
+            LAST_MSG_TIME = time.time()
             logging.debug(f"Received from Player: {message}")
+
+        # If there's a message on the socket, receive and process it
+        #
+        #  if sub_socket in socks:
+        #      message = sub_socket.recv_multipart()
+        #      logging.debug(f"Received from Player: {message}")
 
 
         #  #  message = await sub_socket.recv_string()
