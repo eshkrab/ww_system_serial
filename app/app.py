@@ -109,7 +109,6 @@ async def monitor_socket():
 
 async def send_message_to_player(message):
     try:
-        logging.debug(f"Publishing message: {message}")
         await pub_socket.send_string(message)
     except zmq.ZMQError as e:
         logging.error(f"ZMQError while publishing message: {e}")
@@ -123,10 +122,8 @@ async def subscribe_to_player():
     logging.debug("SUBSCRIBED to player")
 
     while True:
-        logging.debug("Waiting for message from player")
         message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
-        logging.debug(f"Received from Player: {message}")
 
 
         # Process the received message
@@ -161,7 +158,6 @@ async def handle_zmq_to_serial():
 
 async def handle_serial_to_zmq():
     while True:
-        logging.debug("handle_serial_to_zmq")
         if ser.in_waiting:
             data = ser.readline().decode().strip()
             logging.debug(f"Received data from Serial: {data}")
@@ -173,8 +169,6 @@ async def handle_serial_to_zmq():
         await asyncio.sleep(0.1)
 
 async def main():
-    logging.debug("Starting main")
-
     # Start listening to messages from player app and monitor the socket
     tasks = [
         asyncio.create_task(subscribe_to_player()),
