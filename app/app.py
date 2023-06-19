@@ -109,6 +109,7 @@ async def monitor_socket():
 
         # Check if it's been 1 minute since last message received
         if time.time() - LAST_MSG_TIME > 10:
+            logging.debug("Resetting socket")
             sub_socket = reset_socket()
             LAST_MSG_TIME = time.time()
         await asyncio.sleep(1)
