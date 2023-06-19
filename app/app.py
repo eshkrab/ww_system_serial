@@ -123,10 +123,10 @@ async def subscribe_to_player():
     logging.debug("SUBSCRIBED to player")
 
     while True:
-        #  logging.debug("Waiting for message from player")
+        logging.debug("Waiting for message from player")
         message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
-        #  logging.debug(f"Received from Player: {message}")
+        logging.debug(f"Received from Player: {message}")
 
 
         # Process the received message
@@ -178,7 +178,7 @@ async def main():
     await asyncio.create_task(subscribe_to_player())
     await asyncio.create_task(monitor_socket())
 
-    logging.debug("ZMQ TASKS created")
+    logging.debug("ZMQ tasks created")
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
         asyncio.create_task(handle_zmq_to_serial()),
