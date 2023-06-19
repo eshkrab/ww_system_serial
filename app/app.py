@@ -186,6 +186,7 @@ async def main():
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
+    logging.debug("Tasks created")
     await asyncio.gather(*tasks)
 
 # Start the event loop
