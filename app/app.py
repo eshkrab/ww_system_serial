@@ -170,7 +170,7 @@ async def main():
     # Start listening to messages from player app and monitor the socket
     tasks = [
         asyncio.create_task(subscribe_to_player()),
-        asyncio.create_task(monitor_socket())
+        #  asyncio.create_task(monitor_socket())
     ]
 
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
