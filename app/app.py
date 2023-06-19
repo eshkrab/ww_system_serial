@@ -76,6 +76,7 @@ async def subscribe_to_player():
     poller.register(sub_socket, zmq.POLLIN)
 
     while True:
+        logging.debug("Waiting for message from Player")
         socks = dict(poller.poll(100))
 
         # If there's a message on the socket, receive and process it
