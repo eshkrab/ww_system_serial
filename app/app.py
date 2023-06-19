@@ -71,18 +71,13 @@ def reset_socket():
     sub_socket.close()
     # create a new socket
     new_sock = ctx.socket(zmq.SUB)
-    new_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
     logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-    new_sock.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    # bind the new socket
+    # connect the new socket
     try:
         logging.debug(f"OPENING UP SOCKET AGAIN to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-
         new_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
         new_sock.setsockopt_string(zmq.SUBSCRIBE, "")
-
-
     except zmq.ZMQError as zmq_error:
         logging.error(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
         logging.error(f"ZMQ Error occurred during socket reset: {str(zmq_error)}")
@@ -108,7 +103,6 @@ async def monitor_socket():
         #  logging.debug(f"time.time(): {time.time()}")
 
         # Check if it's been 1 minute since last message received
-        logging.debug(f"Time since last message: {time.time() - LAST_MSG_TIME}")
         if time.time() - LAST_MSG_TIME > 10:
             logging.debug("Resetting socket")
             sub_socket = reset_socket()
