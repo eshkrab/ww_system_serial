@@ -83,14 +83,6 @@ def reset_socket():
         logging.error(f"ZMQ Error occurred during socket reset: {str(zmq_error)}")
     return new_sock
 
-async def send_message_to_player(message):
-    try:
-        logging.debug(f"Publishing message: {message}")
-        await pub_socket.send_string(message)
-    except zmq.ZMQError as e:
-        logging.error(f"ZMQError while publishing message: {e}")
-        return -1
-
 LAST_MSG_TIME = time.time()
 
 async def monitor_socket():
@@ -108,6 +100,14 @@ async def monitor_socket():
             LAST_MSG_TIME = time.time()
 
         await asyncio.sleep(0.1)
+
+async def send_message_to_player(message):
+    try:
+        logging.debug(f"Publishing message: {message}")
+        await pub_socket.send_string(message)
+    except zmq.ZMQError as e:
+        logging.error(f"ZMQError while publishing message: {e}")
+        return -1
 
 
 async def subscribe_to_player():
