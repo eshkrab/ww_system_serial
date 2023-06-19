@@ -172,20 +172,17 @@ async def handle_serial_to_zmq():
         #      #  logging.debug(f"Reply from player: {reply}")
         await asyncio.sleep(0.1)
 
-# Run the example usage in an event loop
 async def main():
     # Start listening to messages from player app
     await asyncio.create_task(subscribe_to_player())
     await asyncio.create_task(monitor_socket())
-    await asyncio.create_task(handle_zmq_to_serial()),
-    await asyncio.create_task(handle_serial_to_zmq())
 
-    #  # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
-    #  tasks = [
-    #      asyncio.create_task(handle_zmq_to_serial()),
-    #      asyncio.create_task(handle_serial_to_zmq())
-    #  ]
-    logging.debug("Tasks created")
+    # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
+    tasks = [
+        asyncio.create_task(handle_zmq_to_serial()),
+        asyncio.create_task(handle_serial_to_zmq())
+    ]
+    logging.debug("All Tasks created")
     await asyncio.gather(*tasks)
 
 # Start the event loop
