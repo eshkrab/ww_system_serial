@@ -107,6 +107,7 @@ async def subscribe_to_player():
         #      logging.error(f"Unknown message from Player: {message}")
         #
         await asyncio.sleep(0.1)
+        logging.debug(f"Player state: {player.state}")
 
 
 async def handle_zmq_to_serial():
