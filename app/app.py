@@ -64,8 +64,6 @@ logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq'
 #  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
 
-LAST_MSG_TIME = time.time()
-
 def reset_socket():
     global sub_socket
     logging.debug("Resetting socket")
@@ -104,6 +102,7 @@ async def subscribe_to_player():
 
     poller = zmq.Poller()
     poller.register(sub_socket, zmq.POLLIN)
+    LAST_MSG_TIME = time.time()
 
     while True:
         logging.debug("Waiting for message from Player")
@@ -149,7 +148,6 @@ async def subscribe_to_player():
         #      logging.error(f"Unknown message from Player: {message}")
         #
         await asyncio.sleep(0.1)
-        logging.debug(f"Player state: {player.state}")
 
 
 async def handle_zmq_to_serial():
