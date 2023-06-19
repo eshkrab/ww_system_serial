@@ -61,8 +61,8 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 sub_socket = ctx.socket(zmq.SUB)
 sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-#  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
+sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+#  sub_socket.setsockopt(zmq.SUBSCRIBE, b'brightness\0')
 
 def reset_socket():
     global sub_socket
@@ -96,31 +96,39 @@ async def send_message_to_player(message):
         logging.error(f"ZMQError while publishing message: {e}")
         return -1
 
-async def subscribe_to_player():
+LAST_MSG_TIME = time.time()
+
+async def monitor_socket():
+    #monitor sub_socket and if it's been too long since LAST_MSG_TIME, reset the socket
     global sub_socket
-    logging.debug("Subscribing to Player")
-
-    poller = zmq.Poller()
-    poller.register(sub_socket, zmq.POLLIN)
-    LAST_MSG_TIME = time.time()
-
+    global LAST_MSG_TIME
+    logging.debug("Monitoring socket")
     while True:
-        logging.debug("Waiting for message from Player")
-        socks = dict(poller.poll(100))
+        #  logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
+        #  logging.debug(f"time.time(): {time.time()}")
 
         # Check if it's been 1 minute since last message received
         if time.time() - LAST_MSG_TIME > 60:
             sub_socket = reset_socket()
-            poller.register(sub_socket, zmq.POLLIN)
             LAST_MSG_TIME = time.time()
+        await asyncio.sleep(1)
 
-        logging.debug(f"socks: {socks}")
 
-        if sub_socket in socks:
-            message = sub_socket.recv_multipart()
-            LAST_MSG_TIME = time.time()
-            logging.debug(f"Received from Player: {message}")
+async def subscribe_to_player():
+    global sub_socket
+    global LAST_MSG_TIME
 
+    logging.debug("Subscribing to Player")
+
+    poller = zmq.Poller()
+    poller.register(sub_socket, zmq.POLLIN)
+    logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
+
+    while True:
+        logging.debug("Waiting for message from Player")
+        message = await sub_socket.recv()
+        LAST_MSG_TIME = time.time()
+        logging.debug(f"Received from Player: {message}")
         # If there's a message on the socket, receive and process it
         #
         #  if sub_socket in socks:
