@@ -120,38 +120,30 @@ async def subscribe_to_player():
     logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
 
     while True:
-        logging.debug("Waiting for message from Player")
-
-
         message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
-        logging.debug(f"Received from Player: {message}")
-        # If there's a message on the socket, receive and process it
-        #
-        #  if sub_socket in socks:
-        #      message = sub_socket.recv_multipart()
-        #      logging.debug(f"Received from Player: {message}")
 
+        # Process the received message
+        message = message.split(" ")
+        if message[0] == "state":
+            logging.debug(f"Received state message: {message}")
+            player.state = message[1]
+        elif message[0] == "mode":
+            logging.debug(f"Received mode message: {message}")
+            player.mode = message[1]
+        elif message[0] == "brightness":
+            logging.debug(f"Received brightness message: {message}")
+            brightness = float(message[1]) / 255.0
+            player.brightness = float(brightness)
+        elif message[0] == "fps":
+            logging.debug(f"Received fps message: {message}")
+            player.fps = int(message[1])
+        elif message[0] == "current_media":
+            logging.debug(f"Received current_media message: {message}")
+            player.current_media = message[1]
+        else:
+            logging.error(f"Unknown message from Player: {message}")
 
-        #  #  message = await sub_socket.recv_string()
-        #  #  logging.debug(f"Received from Player: {message}")
-        #
-        #  # Process the received message
-        #  message = message.split(" ")
-        #  if message[0] == "state":
-        #      player.state = message[1]
-        #  elif message[0] == "mode":
-        #      player.mode = message[1]
-        #  elif message[0] == "brightness":
-        #      brightness = float(message[1]) / 255.0
-        #      player.brightness = float(brightness)
-        #  elif message[0] == "fps":
-        #      player.fps = int(message[1])
-        #  elif message[0] == "current_media":
-        #      player.current_media = message[1]
-        #  else:
-        #      logging.error(f"Unknown message from Player: {message}")
-        #
         await asyncio.sleep(0.1)
 
 
@@ -180,6 +172,7 @@ async def main():
     # Start listening to messages from player app
     await asyncio.create_task(subscribe_to_player())
     await asyncio.create_task(monitor_socket())
+
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
         asyncio.create_task(handle_zmq_to_serial()),
