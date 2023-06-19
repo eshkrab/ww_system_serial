@@ -47,7 +47,7 @@ player = Player(brightness=config['brightness_level'], fps=config['fps'])
 ########################
 serial_port = config['serial']['port']
 serial_baudrate = config['serial']['baudrate']
-#  ser = serial.Serial(serial_port, serial_baudrate)
+ser = serial.Serial(serial_port, serial_baudrate)
 
 ########################
 # ZMQ
@@ -161,10 +161,10 @@ async def handle_zmq_to_serial():
 
 async def handle_serial_to_zmq():
     while True:
-        print("handle_serial_to_zmq")
-        #  if ser.in_waiting:
-        #      data = ser.readline().decode().strip()
-        #      logging.debug(f"Received data from Serial: {data}")
+        #  print("handle_serial_to_zmq")
+        if ser.in_waiting:
+            data = ser.readline().decode().strip()
+            logging.debug(f"Received data from Serial: {data}")
         #
         #      # Process the data or send it to ZeroMQ
         #      # Example: Send the data as a message to ZeroMQ
@@ -174,12 +174,9 @@ async def handle_serial_to_zmq():
 
 # Run the example usage in an event loop
 async def main():
-    print("Starting event loop")
     # Start listening to messages from player app
     await asyncio.create_task(subscribe_to_player())
-    print("Subscribed to player")
     await asyncio.create_task(monitor_socket())
-    print("Monitoring socket")
 
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
@@ -194,4 +191,4 @@ if __name__ == '__main__':
     asyncio.run(main())
 
 # Close Serial Port
-#  ser.close()
+ser.close()
