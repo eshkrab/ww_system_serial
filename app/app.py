@@ -102,12 +102,14 @@ async def monitor_socket():
         #  logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
         #  logging.debug(f"time.time(): {time.time()}")
 
+        logging.debug(f"Time since last message: {time.time() - LAST_MSG_TIME}")
         # Check if it's been 1 minute since last message received
         if time.time() - LAST_MSG_TIME > 10:
             logging.debug("Resetting socket")
             sub_socket = reset_socket()
             LAST_MSG_TIME = time.time()
-        await asyncio.sleep(1)
+
+        await asyncio.sleep(0.1)
 
 
 async def subscribe_to_player():
@@ -115,14 +117,13 @@ async def subscribe_to_player():
     global LAST_MSG_TIME
 
     logging.debug("Subscribing to Player")
-
-    poller = zmq.Poller()
-    poller.register(sub_socket, zmq.POLLIN)
     logging.debug(f"LAST_MSG_TIME: {LAST_MSG_TIME}")
 
     while True:
         logging.debug("Waiting for message from Player")
-        message = await sub_socket.recv()
+
+
+        message = await sub_socket.recv_string()
         LAST_MSG_TIME = time.time()
         logging.debug(f"Received from Player: {message}")
         # If there's a message on the socket, receive and process it
@@ -174,11 +175,11 @@ async def handle_serial_to_zmq():
             #  await send_message_to_player(f"process_data {data}")
             #  logging.debug(f"Reply from player: {reply}")
 
-# Example usage
-async def example_usage():
+# Run the example usage in an event loop
+async def main():
     # Start listening to messages from player app
-    asyncio.create_task(subscribe_to_player())
-    asyncio.create_task(monitor_socket())
+    await asyncio.create_task(subscribe_to_player())
+    await asyncio.create_task(monitor_socket())
     # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
     tasks = [
         asyncio.create_task(handle_zmq_to_serial()),
@@ -186,16 +187,6 @@ async def example_usage():
     ]
     await asyncio.gather(*tasks)
 
-# Run the example usage in an event loop
-async def main():
-    await example_usage()
-
 # Start the event loop
-#  zmq.asyncio.install()
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-try:
-    loop.run_until_complete(main())
-finally:
-    loop.close()            
-
+if __name__ == '__main__':
+    asyncio.run(main())
