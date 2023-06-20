@@ -31,7 +31,7 @@ async def listen_to_messages(sub_socket, process_message):
     while True:
         try:
             logging.debug("Waiting for message")
-            message = await sub_socket.recv_string()
+            message = sub_socket.recv_string()
             logging.debug("Received message: " + message)
             await process_message(message)
         except Exception as e:
