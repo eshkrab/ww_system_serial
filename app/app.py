@@ -125,9 +125,12 @@ async def main():
     # Start listening to messages from player app and monitor the socket
     tasks = [
         asyncio.create_task(listen_to_messages(sub_socket, process_message)),
+    ]
+
+    tasks.extend([
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
-    ]
+    ])
 
     logging.debug("Tasks created")
 

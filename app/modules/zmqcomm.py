@@ -26,7 +26,7 @@ async def socket_connect_backoff(sub_socket, ip_connect, port):
 
 
 async def listen_to_messages(sub_socket, process_message):
-    logging.info(f"Started listening to messages {sub_socket}")
+    logging.info(f"Started listening to messages ")
     logging.debug(f"socket port: {sub_socket.getsockopt(zmq.LAST_ENDPOINT)}")
     while True:
         try:
