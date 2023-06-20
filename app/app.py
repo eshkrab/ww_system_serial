@@ -6,7 +6,7 @@ import time
 import zmq
 import zmq.asyncio
 
-from modules.zmqcomm import listen_to_messages, socket_connect_backoff
+from modules.zmqcomm import listen_to_messages, socket_connect
 
 class Player:
     def __init__(self, brightness=250.0, fps=30, state="stopped", mode="repeat", current_media=None):
@@ -117,26 +117,16 @@ async def handle_serial_to_zmq():
         await asyncio.sleep(0.05)
 
 async def main():
-    #  # Connect to the player app
-    #  p_sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-    #  p_sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
-    #  #  await socket_connect_backoff(p_sub_sock, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
-
     # Start listening to messages from player app and monitor the socket
     tasks = [
         asyncio.create_task(listen_to_messages(p_sub_sock, process_message)),
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
-
-    #  tasks.extend([
-    #      asyncio.create_task(handle_zmq_to_serial()),
-    #      asyncio.create_task(handle_serial_to_zmq())
-    #  ])
+    await asyncio.gather(*tasks)
 
     logging.debug("Tasks created")
 
-    await asyncio.gather(*tasks)
 
 # Start the event loop
 if __name__ == '__main__':
