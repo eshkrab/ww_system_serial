@@ -160,6 +160,7 @@ async def handle_serial_to_zmq():
         if ser.in_waiting:
             data = ser.readline().decode().strip()
             await send_message_to_player("imu {data}")
+            logging.debug(f"sent zmq: {data}")
         #
         #      # Process the data or send it to ZeroMQ
         #      # Example: Send the data as a message to ZeroMQ
