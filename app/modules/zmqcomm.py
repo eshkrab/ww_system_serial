@@ -7,9 +7,10 @@ import logging
 LAST_MSG_TIME = time.time()
 
 
-def socket_connect(sub_socket, ip_connect, port):
+async def socket_connect(sub_socket, ip_connect, port):
     sub_socket.connect(f"tcp://{ip_connect}:{port}")
     sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+    await sub_socket.subscribe("") # empty string subscribes to all topics
     #  delay = 1.0
     #  max_delay = 30.0
     #  while True:
@@ -25,19 +26,19 @@ def socket_connect(sub_socket, ip_connect, port):
 
 
 
-def listen_to_messages(sub_socket, process_message):
+async def listen_to_messages(sub_socket, process_message):
     logging.info(f"Started listening to messages ")
     logging.debug(f"socket port: {sub_socket.getsockopt(zmq.LAST_ENDPOINT)}")
     while True:
         try:
             logging.debug("Waiting for message")
-            message = sub_socket.recv_string()
+            message = await sub_socket.recv_string()
             logging.debug("Received message: " + message)
             process_message(message)
         except Exception as e:
             logging.error("Error processing message: "+ str(e))
 
-        time.sleep(0.01)
+        await asyncio.sleep(0.1)
 #
 #  async def listen_to_messages(sub_socket, process_message):
 #      logging.info(f"Started listening to messages ")

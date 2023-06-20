@@ -60,10 +60,10 @@ pub_socket = ctx.socket(zmq.PUB)
 pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_pub']}")  # Publish to the player app
 
 # Subscribe to the player app
-p_sub_sock = ctx.socket(zmq.SUB)
-socket_connect(p_sub_sock, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
-#  p_sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-#  p_sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+sub_sock = ctx.socket(zmq.SUB)
+socket_connect(sub_sock, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
+#  sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+#  sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
 
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 
@@ -119,7 +119,7 @@ async def handle_serial_to_zmq():
 async def main():
     # Start listening to messages from player app and monitor the socket
     tasks = [
-        asyncio.create_task(listen_to_messages(p_sub_sock, process_message)),
+        asyncio.create_task(listen_to_messages(sub_sock, process_message)),
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
