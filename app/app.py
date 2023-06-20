@@ -107,7 +107,7 @@ async def handle_serial_to_zmq():
         #      # Example: Send the data as a message to ZeroMQ
         #      #  await send_message_to_player(f"process_data {data}")
         #      #  logging.debug(f"Reply from player: {reply}")
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.1)
 
 async def main():
     # Start listening to messages from player app and monitor the socket
@@ -124,7 +124,8 @@ async def main():
 
 # Start the event loop
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub'], process_message))
+    #  asyncio.run(main())
 
 # Close Serial Port
 ser.close()
