@@ -5,9 +5,8 @@ import asyncio
 import time
 import zmq
 import zmq.asyncio
-from app.modules.zmqcomm import subscribe_to_messages
+from modules.zmqcomm import subscribe_to_messages
 
-from modules.zmqcomm import listen_to_messages, socket_connect
 
 class Player:
     def __init__(self, brightness=250.0, fps=30, state="stopped", mode="repeat", current_media=None):
