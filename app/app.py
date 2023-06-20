@@ -61,8 +61,9 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 
 # Subscribe to the player app
 p_sub_sock = ctx.socket(zmq.SUB)
-p_sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-p_sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+socket_connect(p_sub_sock, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
+#  p_sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+#  p_sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
 
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 

@@ -7,7 +7,7 @@ import logging
 LAST_MSG_TIME = time.time()
 
 
-async def socket_connect(sub_socket, ip_connect, port):
+def socket_connect(sub_socket, ip_connect, port):
     sub_socket.connect(f"tcp://{ip_connect}:{port}")
     sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
     #  delay = 1.0
