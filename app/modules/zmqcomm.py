@@ -31,15 +31,16 @@ async def subscribe_to_messages(ctx, ip_connect, port, process_message):
     sub_socket = ctx.socket(zmq.SUB)
     sub_socket.connect(f"tcp://{ip_connect}:{port}")
     sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-    sub_socket.subscribe("") # empty string subscribes to all topics
+    #  sub_socket.subscribe("") # empty string subscribes to all topics
     logging.info(f"Started listening to messages ")
     logging.debug(f"socket port: {sub_socket.getsockopt(zmq.LAST_ENDPOINT)}")
+
     while True:
         try:
             logging.debug("Waiting for message")
             message = await sub_socket.recv_string()
             logging.debug("Received message: " + message)
-            process_message(message)
+            await process_message(message)
         except Exception as e:
             logging.error("Error processing message: "+ str(e))
 
