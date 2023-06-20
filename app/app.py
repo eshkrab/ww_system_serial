@@ -118,7 +118,7 @@ async def handle_serial_to_zmq():
 
 async def main():
     # Connect to the player app
-    await socket_connect_backoff(sub_socket, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
+    #  await socket_connect_backoff(sub_socket, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
 
     # Start listening to messages from player app and monitor the socket
     tasks = [
