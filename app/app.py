@@ -61,7 +61,9 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 
 # Subscribe to the player app
 sub_sock = ctx.socket(zmq.SUB)
-socket_connect(sub_sock, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
+sub_sock.connect(f"tcp://{ config['zmq']['ip_connect'] }:{ config['zmq']['port_player_pub']}")
+#  sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+sub_sock.subscribe("")
 #  sub_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 #  sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
 
@@ -108,7 +110,7 @@ async def handle_serial_to_zmq():
         if ser.in_waiting:
             data = ser.readline().decode().strip()
             await send_message_to_player("imu %s" % data)
-            logging.debug(f"sent zmq: {data}")
+            #  logging.debug(f"sent zmq: {data}")
         #
         #      # Process the data or send it to ZeroMQ
         #      # Example: Send the data as a message to ZeroMQ
