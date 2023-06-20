@@ -61,8 +61,8 @@ pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_p
 
 # Subscribe to the player app
 sub_socket = ctx.socket(zmq.SUB)
-#  sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-#  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 
@@ -117,10 +117,10 @@ async def handle_serial_to_zmq():
         await asyncio.sleep(0.05)
 
 async def main():
-    # Connect to the player app
-    sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
-    sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-    #  await socket_connect_backoff(sub_socket, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
+    #  # Connect to the player app
+    #  sub_socket.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
+    #  sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+    #  #  await socket_connect_backoff(sub_socket, config['zmq']['ip_connect'], config['zmq']['port_player_pub'])
 
     # Start listening to messages from player app and monitor the socket
     tasks = [
