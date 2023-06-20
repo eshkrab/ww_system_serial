@@ -67,7 +67,7 @@ async def send_message_to_player(message):
         logging.error(f"ZMQError while publishing message: {e}")
         return -1
 
-async def process_message(message):
+def process_message(message):
     # Process the received message
     message = message.split(" ")
     if message[0] == "state":

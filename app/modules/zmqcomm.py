@@ -40,8 +40,7 @@ async def subscribe_to_messages( ip_connect, port, process_message):
             logging.debug("Waiting for message")
             message = await sub_sock.recv_string()
             logging.debug("Received message: " + message)
-            await process_message(message)
-            await asyncio.sleep(0.1)
+            process_message(message)
     finally:
         sub_sock.setsockopt(zmq.LINGER, 0)
         sub_sock.close()
