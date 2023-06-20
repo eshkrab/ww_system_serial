@@ -59,7 +59,7 @@ ctx = zmq.asyncio.Context()
 pub_socket = ctx.socket(zmq.PUB)
 pub_socket.bind(f"tcp://{config['zmq']['ip_bind']}:{config['zmq']['port_serial_pub']}")  # Publish to the player app
 
-async def subscribe_to_messages( ip_connect, port):
+async def subscribe_to_messages( ip_connect, port, process_message):
     logging.info("Started listening to messages")
 
     ctx = zmq.asyncio.Context.instance()
@@ -70,51 +70,47 @@ async def subscribe_to_messages( ip_connect, port):
 
     try:
         while True:
-            logging.debug("Waiting for message")
             message = await sub_sock.recv_string()
-            logging.debug("Received message: " + message)
-
-            # Process the received message
-            message = message.split(" ")
-            if message[0] == "state":
-                player.state = message[1]
-            elif message[0] == "mode":
-                player.mode = message[1]
-            elif message[0] == "brightness":
-                brightness = float(message[1]) / 255.0
-                player.brightness = float(brightness)
-            elif message[0] == "fps":
-                player.fps = int(message[1])
-            elif message[0] == "current_media":
-                player.current_media = message[1]
-            else:
-                logging.error(f"Unknown message from Player: {message}")
-
+            process_message(message)
             await asyncio.sleep(0.1)
 
     finally:
         sub_sock.setsockopt(zmq.LINGER, 0)
         sub_sock.close()
 
+def process_message(message):
+    # Process the received message
+    message = message.split(" ")
+    if message[0] == "state":
+        player.state = message[1]
+    elif message[0] == "mode":
+        player.mode = message[1]
+    elif message[0] == "brightness":
+        brightness = float(message[1]) / 255.0
+        player.brightness = float(brightness)
+    elif message[0] == "fps":
+        player.fps = int(message[1])
+    elif message[0] == "current_media":
+        player.current_media = message[1]
+    else:
+        logging.error(f"Unknown message from Player: {message}")
+
 
 async def main():
     # Start listening to messages from player app and monitor the socket
-    asyncio.run(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub']))
-    #  tasks = [
-    #      asyncio.create_task(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub'], process_message)),
-    #      asyncio.create_task(handle_zmq_to_serial()),
-    #      asyncio.create_task(handle_serial_to_zmq())
-    #  ]
-    #  await asyncio.gather(*tasks)
+    tasks = [
+        asyncio.create_task(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub'], process_message)),
+        asyncio.create_task(handle_zmq_to_serial()),
+        asyncio.create_task(handle_serial_to_zmq())
+    ]
+    await asyncio.gather(*tasks)
 
     logging.debug("Tasks created")
 
 
 # Start the event loop
 if __name__ == '__main__':
-    asyncio.run(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub']))
-
-    #  asyncio.run(main())
+    asyncio.run(main())
 
 # Close Serial Port
 ser.close()
