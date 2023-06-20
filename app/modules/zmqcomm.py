@@ -35,16 +35,18 @@ async def subscribe_to_messages(ctx, ip_connect, port, process_message):
     logging.info(f"Started listening to messages ")
     logging.debug(f"socket port: {sub_socket.getsockopt(zmq.LAST_ENDPOINT)}")
 
-    while True:
-        try:
+    try:
+        while True:
             logging.debug("Waiting for message")
             message = await sub_socket.recv_string()
             logging.debug("Received message: " + message)
             await process_message(message)
-        except Exception as e:
-            logging.error("Error processing message: "+ str(e))
+            await asyncio.sleep(0.1)
+    finally:
+        sub_socket.setsockopt(zmq.LINGER, 0)
+        sub_socket.close()
 
-        await asyncio.sleep(0.1)
+
 #
 #  async def listen_to_messages(sub_socket, process_message):
 #      logging.info(f"Started listening to messages ")
