@@ -113,6 +113,7 @@ async def main():
 # Start the event loop
 if __name__ == '__main__':
     asyncio.run(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub']))
+
     #  asyncio.run(main())
 
 # Close Serial Port
