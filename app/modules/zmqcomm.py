@@ -26,25 +26,25 @@ def socket_connect(sub_socket, ip_connect, port):
 
 
 
-async def subscribe_to_messages(ctx, ip_connect, port, process_message):
+async def subscribe_to_messages( ip_connect, port, process_message):
+    logging.info("Started listening to messages")
 
-    sub_socket = ctx.socket(zmq.SUB)
-    sub_socket.connect(f"tcp://{ip_connect}:{port}")
-    sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
-    #  sub_socket.subscribe("") # empty string subscribes to all topics
-    logging.info(f"Started listening to messages ")
-    logging.debug(f"socket port: {sub_socket.getsockopt(zmq.LAST_ENDPOINT)}")
+    ctx = zmq.asyncio.Context.instance()
+    sub_sock = ctx.socket(zmq.SUB)
+    sub_sock.connect(f"tcp://{ip_connect}:{port}")
+    sub_sock.setsockopt_string(zmq.SUBSCRIBE, "")
+    logging.debug("socket port: "+ str(sub_sock.getsockopt(zmq.LAST_ENDPOINT)))
 
     try:
         while True:
             logging.debug("Waiting for message")
-            message = await sub_socket.recv_string()
+            message = await sub_sock.recv_string()
             logging.debug("Received message: " + message)
             await process_message(message)
             await asyncio.sleep(0.1)
     finally:
-        sub_socket.setsockopt(zmq.LINGER, 0)
-        sub_socket.close()
+        sub_sock.setsockopt(zmq.LINGER, 0)
+        sub_sock.close()
 
 
 #

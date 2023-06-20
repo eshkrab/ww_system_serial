@@ -112,7 +112,7 @@ async def handle_serial_to_zmq():
 async def main():
     # Start listening to messages from player app and monitor the socket
     tasks = [
-        asyncio.create_task(subscribe_to_messages(ctx,  config['zmq']['ip_connect'], config['zmq']['port_player_pub'], process_message)),
+        asyncio.create_task(subscribe_to_messages( config['zmq']['ip_connect'], config['zmq']['port_player_pub'], process_message)),
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
     ]
