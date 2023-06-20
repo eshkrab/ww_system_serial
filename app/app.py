@@ -6,6 +6,8 @@ import time
 import zmq
 import zmq.asyncio
 
+from modules.zmqcomm import listen_to_messages, socket_connect_backoff
+
 class Player:
     def __init__(self, brightness=250.0, fps=30, state="stopped", mode="repeat", current_media=None):
         self.state = state
@@ -64,48 +66,6 @@ sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
 
-def reset_socket(sub_socket):
-    logging.debug("Resetting socket")
-    # close the current socket
-    sub_socket.close()
-    # create a new socket
-    new_sock = ctx.socket(zmq.SUB)
-    logging.debug(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-
-    # connect the new socket
-    try:
-        logging.debug(f"OPENING UP SOCKET AGAIN to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-        new_sock.connect(f"tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")  
-        new_sock.setsockopt_string(zmq.SUBSCRIBE, "")
-    except zmq.ZMQError as zmq_error:
-        logging.error(f"Subscribing to tcp://{config['zmq']['ip_connect']}:{config['zmq']['port_player_pub']}")
-        logging.error(f"ZMQ Error occurred during socket reset: {str(zmq_error)}")
-    return new_sock
-
-LAST_MSG_TIME = time.time()
-
-async def monitor_socket():
-    #monitor sub_socket and if it's been too long since LAST_MSG_TIME, reset the socket
-    global sub_socket
-    global LAST_MSG_TIME
-    logging.debug("Monitoring socket")
-    while True:
-
-        #  logging.debug(f"Time since last message: {time.time() - LAST_MSG_TIME}")
-        # Check if it's been 1 minute since last message received
-        if time.time() - LAST_MSG_TIME > 10:
-            logging.debug("Resetting socket")
-            fut = asyncio.ensure_future(sub_socket.recv())
-            try:
-                resp = await asyncio.wait_for(fut, timeout=0.5)  # Close the previous socket only after a short time-out
-                LAST_MSG_TIME = time.time()
-                logging.debug("New message received, not resetting the socket!")
-            except asyncio.TimeoutError:
-                sub_socket = reset_socket(sub_socket)
-                LAST_MSG_TIME = time.time()
-
-        await asyncio.sleep(1)
-
 async def send_message_to_player(message):
     try:
         await pub_socket.send_string(message)
@@ -113,36 +73,24 @@ async def send_message_to_player(message):
         logging.error(f"ZMQError while publishing message: {e}")
         return -1
 
+async def process_message(message):
+    # Process the received message
+    message = message.split(" ")
+    if message[0] == "state":
+        player.state = message[1]
+    elif message[0] == "mode":
+        player.mode = message[1]
+    elif message[0] == "brightness":
+        brightness = float(message[1]) / 255.0
+        player.brightness = float(brightness)
+    elif message[0] == "fps":
+        player.fps = int(message[1])
+    elif message[0] == "current_media":
+        player.current_media = message[1]
+    else:
+        logging.error(f"Unknown message from Player: {message}")
 
-async def subscribe_to_player():
-    global sub_socket
-    global LAST_MSG_TIME
-
-    logging.debug("SUBSCRIBED to player")
-
-    while True:
-        message = await sub_socket.recv_string()
-        LAST_MSG_TIME = time.time()
-        logging.debug(f"Received message from Player: {message}")
-
-
-        # Process the received message
-        message = message.split(" ")
-        if message[0] == "state":
-            player.state = message[1]
-        elif message[0] == "mode":
-            player.mode = message[1]
-        elif message[0] == "brightness":
-            brightness = float(message[1]) / 255.0
-            player.brightness = float(brightness)
-        elif message[0] == "fps":
-            player.fps = int(message[1])
-        elif message[0] == "current_media":
-            player.current_media = message[1]
-        else:
-            logging.error(f"Unknown message from Player: {message}")
-
-        await asyncio.sleep(0.1)
+    await asyncio.sleep(0.1)
 
 
 async def handle_zmq_to_serial():
@@ -169,17 +117,15 @@ async def handle_serial_to_zmq():
         await asyncio.sleep(0.05)
 
 async def main():
+    # Connect to the player app
+    asyncio.run(socket_connect_backoff(sub_socket, config['zmq']['ip_connect'], config['zmq']['port_player_pub']))
+
     # Start listening to messages from player app and monitor the socket
     tasks = [
-        asyncio.create_task(subscribe_to_player()),
-        #  asyncio.create_task(monitor_socket())
-    ]
-
-    # Start the ZeroMQ-to-Serial and Serial-to-ZeroMQ handlers
-    tasks.extend([
+        asyncio.create_task(listen_to_messages(sub_socket, process_message)),
         asyncio.create_task(handle_zmq_to_serial()),
         asyncio.create_task(handle_serial_to_zmq())
-    ])
+    ]
 
     logging.debug("Tasks created")
 
