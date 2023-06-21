@@ -95,6 +95,29 @@ def process_message(message):
     else:
         logging.error(f"Unknown message from Player: {message}")
 
+########################
+# SERIAL
+########################
+async def handle_zmq_to_serial():
+    while True:
+        #  message = await socket.recv_string()
+        #  logging.debug(f"Received message from ZeroMQ: {message}")
+        #
+        #  # Write the message to the serial port
+        #  ser.write(message.encode())
+        await asyncio.sleep(0.1)
+
+async def handle_serial_to_zmq():
+    while True:
+        if ser.in_waiting > 0:
+            data = ser.readline().decode().strip()
+            logging.debug(f"Received data from serial port: {data}")
+
+            # Process the data or send it to ZeroMQ
+            # Example: Send the data as a message to ZeroMQ
+            #  reply = await send_message_to_player(f"process_data {data}")
+            #  logging.debug(f"Reply from player: {reply}")
+        await asyncio.sleep(0.1)
 
 async def main():
     # Start listening to messages from player app and monitor the socket
